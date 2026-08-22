@@ -1,11 +1,136 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ConnectCRM CRM{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <title>
+        {% block title %}ConnectCRM{% endblock %}
+    </title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-{% if user.is_authenticated %}
+
+    <div class="app-layout">
+
+        <!-- CONNECTCRM SHARED SIDEBAR This sidebar will appear across authenticated CRM page -->
+        <aside class="sidebar">
+
+            <!-- Brand -->
+            <div class="sidebar-brand">
+                <a href="{% url 'core:dashboard' %}" class="brand-link">
+                    <span class="brand-icon">C</span>
+                    <span class="brand-text">ConnectCRM</span>
+                </a>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="sidebar-nav">
+
+                <p class="nav-label">MAIN MENU</p>
+
+                <a href="{% url 'core:dashboard' %}" class="nav-link">
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <p class="nav-label">CRM</p>
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    <span>Contacts</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">🏢</span>
+                    <span>Companies</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">◫</span>
+                    <span>Deals</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">✓</span>
+                    <span>Tasks</span>
+                </a>
+
+            </nav>
+
+            <!-- Bottom Navigation -->
+            <div class="sidebar-footer">
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">?</span>
+                    <span>Help & Support</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN APPLICATION AREA -->
+        <main class="main-content">
+
+            <!-- Shared Top Bar -->
+            <header class="topbar">
+
+                <div class="topbar-left">
+                    {% block page_heading %}{% endblock %}
+                </div>
+
+                <div class="topbar-right">
+
+                    <!-- Global Search Placeholder -->
+                    <div class="search-placeholder">
+                        <span>⌕</span>
+                        <span>Search...</span>
+                    </div>
+
+                    <!-- Notifications Placeholder -->
+                    <button type="button" class="icon-button">
+                        🔔
+                    </button>
+
+                    <!-- User Profile Placeholder -->
+                    <button type="button" class="user-menu">
+                        <span class="user-avatar">CK</span>
+                        <span class="user-name">User</span>
+                        <span>⌄</span>
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- Page Content -->
+            <section class="page-content">
+
+                {% block content %}
+                {% endblock %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

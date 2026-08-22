@@ -1,0 +1,393 @@
+/* CONNECTCRM - GLOBAL DESIGN SYSTEM
+   Shared styling for the application layout and components. */
+
+
+/* 1. RESET & GLOBAL SETTINGs */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --sidebar-bg: #111827;
+    --sidebar-hover: #1f2937;
+    --sidebar-active: #2563eb;
+
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-light: #9ca3af;
+
+    --border-color: #e5e7eb;
+
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --danger: #dc2626;
+
+    --sidebar-width: 260px;
+    --topbar-height: 76px;
+
+    --border-radius: 10px;
+    --transition: 0.2s ease;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--page-bg);
+    color: var(--text-primary);
+}
+
+
+/* 2. MAIN APPLICATION LAYOUT */
+
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+}
+
+
+/* 3. SIDEBAR */
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+
+    background-color: var(--sidebar-bg);
+
+    display: flex;
+    flex-direction: column;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    padding: 24px 14px;
+}
+
+
+/* Brand */
+
+.sidebar-brand {
+    padding: 0 12px;
+    margin-bottom: 40px;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--primary);
+    border-radius: 8px;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.brand-text {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+/* Navigation */
+
+.sidebar-nav {
+    flex: 1;
+}
+
+.nav-label {
+    color: #6b7280;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    margin: 0 12px 10px;
+}
+
+.nav-label:not(:first-child) {
+    margin-top: 30px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 11px 12px;
+    margin-bottom: 4px;
+
+    color: #d1d5db;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background-color var(--transition),
+                color var(--transition);
+}
+
+.nav-link:hover {
+    background-color: var(--sidebar-hover);
+    color: #ffffff;
+}
+
+.nav-link.active {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+
+.nav-icon {
+    width: 20px;
+
+    display: inline-flex;
+    justify-content: center;
+
+    font-size: 16px;
+}
+
+
+/* Sidebar Footer */
+
+.sidebar-footer {
+    border-top: 1px solid #374151;
+    padding-top: 16px;
+}
+
+
+/* 4. MAIN CONTENT AREA */
+
+.main-content {
+    width: 100%;
+    min-height: 100vh;
+
+    margin-left: var(--sidebar-width);
+}
+
+
+/* 5. TOP BAR */
+
+.topbar {
+    height: var(--topbar-height);
+
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 32px;
+}
+
+.topbar-left h1 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+
+/* Search */
+
+.search-placeholder {
+    width: 220px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 14px;
+
+    color: var(--text-light);
+    background-color: #f9fafb;
+
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+/* Buttons */
+
+.icon-button {
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #dbeafe;
+    color: var(--primary);
+
+    border-radius: 50%;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* 6. PAGE CONTENT */
+
+.page-content {
+    padding: 32px;
+}
+
+
+/* 7. REUSABLE COMPONENTS */
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    text-decoration: none;
+
+    transition: background-color var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+
+/* 8. RESPONSIVE FOUNDATION */
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        width: 72px;
+        padding: 24px 10px;
+    }
+
+    .brand-text,
+    .nav-link span:not(.nav-icon),
+    .nav-label,
+    .user-name {
+        display: none;
+    }
+
+    .sidebar-brand {
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-link {
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .sidebar-footer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-content {
+        margin-left: 72px;
+    }
+
+    .search-placeholder {
+        width: auto;
+    }
+}
+
+
+@media (max-width: 640px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .topbar {
+        padding: 0 16px;
+    }
+
+    .page-content {
+        padding: 20px 16px;
+    }
+
+    .search-placeholder {
+        display: none;
+    }
+}
