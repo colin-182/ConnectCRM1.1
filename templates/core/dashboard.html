@@ -1,14 +1,84 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard | ConnectCRM{% endblock %}
-
 {% block page_heading %}
-    <h1>Dashboard</h1>
-{% endblock %}
-
+<h1>Dashboard</h1>
 {% block content %}
 
-    <h2>Welcome to ConnectCRM</h2>
-    <p>Your dashboard will appear here.</p>
+<!-- Dashboard Header -->
+ <div class="dashboard-header">
+    <div>
+        <p class="page-eyebrow">OVERVIEW</p>
+        <h2>Welcome back!</h2>
+        <p class="dashboard-subtitle">
+            Here is an overview of your business activity.
+        </p>
+    </div>
 
-{% endblock %}
+    <a href="#" class="btn btn-primary">
+        + Add Deal
+    </a>
+ </div>
+
+ <!-- KPI Cards -->
+
+ <div class="stats-grid">
+    <!-- Total contacts -->
+     <div class="stat-card card">
+        <div class="stat-card-top">
+            <p class="stat-label">TOTAL CONTACTS</p>
+            <span class="stat-icon">👥</span>
+        </div>
+
+        <div class="stat-value">248</div>
+        <p class="stat-change positive">
+            ⬆12% <span>vs last month</span>
+        </p>
+     </div>
+
+     <!-- Active Deals -->
+      <div class="stat-card card">
+        <div class="stat-card-top">
+            <p class="stat-label">ACTIVE DEALS</p>
+            <span class="stat-icon">📖</span>
+        </div>
+
+        <div class="stat-value">18</div>
+        <p class="stat-change positive">
+            ⬆8% <span>vs last month</span>
+        </p>
+      </div>
+
+    <!-- Pipeline Value -->
+     <div class="stat-card card">
+        <div class="stat-card-top">
+            <p class="stat-label">PIPELINE VALUE</p>
+            <span class="stat-icon">€</span>
+        </div>
+
+        <div class="stat-value">€84,500</div>
+        <p class="stat-change positive">
+            ⬆15% <span>vs last month</span>
+        </p>
+     </div>
+
+     <!-- Tasks Due -->
+      <div class="stat-card card">
+        <div class="stat-card-top">
+            <p class="stat-label">TASKS DUE</p>
+            <span class="stat-icon">✔️</span>
+        </div>
+
+        <div class="stat-value">7</div>
+        <p class="stat-change warning">
+            3 <span>due today</span>
+        </p>
+      </div>
+ </div>
+
+ <!-- Temp marker for next dashboard section -->
+  <div class="dashboard-placeholder card">
+    <h3>Sales Pipeline</h3>
+    <p>Ppieline, recent activity and upcoming tasks will be added here.</p>
+  </div>
+
+  {% endblock %}
