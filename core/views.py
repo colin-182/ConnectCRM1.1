@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.shortcuts import render
 
 
 def home(request):
@@ -6,4 +7,4 @@ def home(request):
 
 
 def dashboard(request):
-    return HttpResponse("ConnectCRM Dashboard")
+    return render(request, "core/dashboard.html")
