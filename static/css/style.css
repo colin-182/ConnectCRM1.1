@@ -521,3 +521,102 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 1200px) {
+
+    .pipeline-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .pipeline-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 640px) {
+
+    .pipeline-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+}
+
+/* Sales Pipeline */
+
+.pipeline-section {
+    padding: 24px;
+    margin-bottom: 28px;
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.section-header h3 {
+    margin-bottom: 6px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.section-header p {
+    color: var(text--secondary);
+    font-size: 13px;
+}
+
+.text-link {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.text-link:hover {
+    text-decoration: underline;
+}
+
+.pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+}
+
+.pipeline-stage {
+    padding: 18px;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.pipeline-label {
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6em;
+}
+
+.pipeline-count {
+    margin-bottom: 6px;
+    color: var(--text-primary);
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.pipeline-value {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
