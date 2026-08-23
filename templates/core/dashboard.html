@@ -9,7 +9,7 @@
 {% block content %}
 
 <!-- Dashboard Header -->
- <div class="dashboard-header">
+<div class="dashboard-header">
     <div>
         <p class="page-eyebrow">OVERVIEW</p>
         <h2>Welcome back!</h2>
@@ -21,13 +21,14 @@
     <a href="#" class="btn btn-primary">
         + Add Deal
     </a>
- </div>
+</div>
 
- <!-- KPI Cards -->
 
- <div class="stats-grid">
-    <!-- Total contacts -->
-     <div class="stat-card card">
+<!-- KPI Cards -->
+<div class="stats-grid">
+
+    <!-- Total Contacts -->
+    <div class="stat-card card">
         <div class="stat-card-top">
             <p class="stat-label">TOTAL CONTACTS</p>
             <span class="stat-icon">👥</span>
@@ -37,10 +38,11 @@
         <p class="stat-change positive">
             ⬆12% <span>vs last month</span>
         </p>
-     </div>
+    </div>
 
-     <!-- Active Deals -->
-      <div class="stat-card card">
+
+    <!-- Active Deals -->
+    <div class="stat-card card">
         <div class="stat-card-top">
             <p class="stat-label">ACTIVE DEALS</p>
             <span class="stat-icon">📖</span>
@@ -50,10 +52,10 @@
         <p class="stat-change positive">
             ⬆8% <span>vs last month</span>
         </p>
-      </div>
+    </div>
 
     <!-- Pipeline Value -->
-     <div class="stat-card card">
+    <div class="stat-card card">
         <div class="stat-card-top">
             <p class="stat-label">PIPELINE VALUE</p>
             <span class="stat-icon">€</span>
@@ -63,10 +65,11 @@
         <p class="stat-change positive">
             ⬆15% <span>vs last month</span>
         </p>
-     </div>
+    </div>
 
-     <!-- Tasks Due -->
-      <div class="stat-card card">
+
+    <!-- Tasks Due -->
+    <div class="stat-card card">
         <div class="stat-card-top">
             <p class="stat-label">TASKS DUE</p>
             <span class="stat-icon">✔️</span>
@@ -76,12 +79,14 @@
         <p class="stat-change warning">
             3 <span>due today</span>
         </p>
-      </div>
- </div>
+    </div>
 
- <!-- Sales PIpeline -->>
+</div>
 
- <section class="pipeline-section card">
+
+<!-- Sales Pipeline -->
+<section class="pipeline-section card">
+
     <div class="section-header">
         <div>
             <h3>Sales Pipeline</h3>
@@ -110,7 +115,8 @@
             <p class="pipeline-value">€16,500</p>
         </div>
 
-        <div class="pipeline-storage">
+
+        <div class="pipeline-stage">
             <p class="pipeline-label">NEGOTIATION</p>
             <p class="pipeline-count">3</p>
             <p class="pipeline-value">€12,000</p>
@@ -123,20 +129,24 @@
         </div>
 
     </div>
- </section>
 
- <!-- Dashboard lower grid -->
-  <div class="dashboard-lower-grid">
+</section>
+
+
+<!-- Dashboard Lower Grid -->
+<div class="dashboard-lower-grid">
+
 
     <!-- Recent Activity -->
-     <section class="activity-section card">
+    <section class="activity-section card">
+
         <div class="section-header">
             <div>
                 <h3>Recent Activity</h3>
                 <p>Latest activity across your base.</p>
             </div>
 
-            <a href="#" class="text-link">View all ⃗ </a>
+            <a href="#" class="text-link">View all →</a>
         </div>
 
         <div class="activity-list">
@@ -153,7 +163,7 @@
                     <p class="activity-description">
                         Jo Bloggs was added to your contacts.
                     </p>
-                    
+
                     <p class="activity-time">
                         10 minutes ago
                     </p>
@@ -217,26 +227,29 @@
                     <p class="activity-time">
                         Yesterday
                     </p>
-
                 </div>
             </div>
         </div>
-     </section>
 
-     <!-- Upcoming Tasks -->
+    </section>
 
-     <sction class="tasks-section card">
+
+    <!-- Upcoming Tasks -->
+    <section class="tasks-section card">
+
         <div class="section-header">
             <div>
                 <h3>Upcoming Tasks</h3>
                 <p>Stay on top of your next actions.</p>
             </div>
 
-            <a href="#" class="text-link">View all ⃗</a>
+            <a href="#" class="text-link">View all →</a>
         </div>
 
         <div class="task-list">
+            <!-- Task 1 -->
             <div class="task-item">
+                <div class="task-checkbox"></div>
                 <div class="task-content">
                     <p class="task-title">
                         Follow up with Jo Bloggs
@@ -251,6 +264,7 @@
                 </span>
             </div>
 
+            <!-- Task 2 -->
             <div class="task-item">
                 <div class="task-checkbox"></div>
 
@@ -260,7 +274,7 @@
                     </p>
 
                     <p class="task-meta">
-                        Tomrrow | 10:00am
+                        Tomorrow | 10:00am
                     </p>
                 </div>
 
@@ -269,6 +283,7 @@
                 </span>
             </div>
 
+            <!-- Task 3 -->
             <div class="task-item">
                 <div class="task-checkbox"></div>
 
@@ -287,7 +302,9 @@
                 </span>
             </div>
 
+            <!-- Task 4 -->
             <div class="task-item">
+                <div class="task-checkbox"></div>
                 <div class="task-content">
                     <p class="task-title">
                         Review quarterly pipeline
@@ -303,8 +320,9 @@
                 </span>
             </div>
         </div>
-     </sction>
-    
-  </div>
 
- {% endblock %}
+    </section>
+
+</div>
+
+{% endblock %}
