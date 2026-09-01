@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Log In | ConnectCRM{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <p class="page-eyebrow">CONNECTCRM</p>
+            <h1>Welcome back</h1>
+            <p>
+                Log in to manage your customers and sales.
+            </p>
+        </div>
+
+        {% if error %}
+            <p class="form-error">{{ error }}</p>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">
+                    Username
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit">
+                Log in
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Don't have an account?
+            <a href="{% url 'accounts:register' %}">
+                Create an account
+            </a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
