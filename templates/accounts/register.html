@@ -2,59 +2,79 @@
 
 {% block title %}Create Account | ConnectCRM{% endblock %}
 
-{% block content %}
-<div class="auth-container">
+{% block auth_content %}
+
+<div class="auth-page">
+
     <div class="auth-card">
 
+        <div class="auth-brand">
+            <span class="auth-brand-icon">C</span>
+            <span class="auth-brand-text">ConnectCRM</span>
+        </div>
+
         <div class="auth-header">
-            <p class="page-eyebrow">CONNECTCRM</p>
+            <p class="page-eyebrow">GET STARTED</p>
+
             <h1>Create your account</h1>
+
             <p>
                 Start managing your customers and sales in one place.
             </p>
         </div>
 
-        <form method="post">
+        <form method="post" class="auth-form">
+
             {% csrf_token %}
 
             {{ form.non_field_errors }}
 
             <div class="form-group">
+
                 <label for="{{ form.username.id_for_label }}">
                     Username
                 </label>
+
                 {{ form.username }}
 
                 {% for error in form.username.errors %}
                     <p class="form-error">{{ error }}</p>
                 {% endfor %}
+
             </div>
 
             <div class="form-group">
+
                 <label for="{{ form.password1.id_for_label }}">
                     Password
                 </label>
+
                 {{ form.password1 }}
 
                 {% for error in form.password1.errors %}
                     <p class="form-error">{{ error }}</p>
                 {% endfor %}
+
             </div>
 
             <div class="form-group">
+
                 <label for="{{ form.password2.id_for_label }}">
                     Confirm password
                 </label>
+
                 {{ form.password2 }}
 
                 {% for error in form.password2.errors %}
                     <p class="form-error">{{ error }}</p>
                 {% endfor %}
+
             </div>
 
             <button type="submit" class="btn btn-primary auth-submit">
                 Create account
             </button>
+
         </form>
 
         <p class="auth-footer">
@@ -65,5 +85,7 @@
         </p>
 
     </div>
+
 </div>
-{% endblock %}
+
+{% endblock auth_content %}

@@ -18,9 +18,11 @@
 
 <body>
 
+    {% block auth_content %}
+
     <div class="app-layout">
 
-        <!-- CONNECTCRM SHARED SIDEBAR This sidebar will appear across authenticated CRM pages -->
+        <!-- CONNECTCRM SHARED SIDEBAR -->
         <aside class="sidebar">
 
             <!-- Brand -->
@@ -82,7 +84,6 @@
 
         </aside>
 
-
         <!-- MAIN APPLICATION AREA -->
         <main class="main-content">
 
@@ -95,18 +96,15 @@
 
                 <div class="topbar-right">
 
-                    <!-- Global Search Placeholder -->
                     <div class="search-placeholder">
                         <span>⌕</span>
                         <span>Search...</span>
                     </div>
 
-                    <!-- Notifications Placeholder -->
                     <button type="button" class="icon-button">
                         🔔
                     </button>
 
-                    <!-- User Profile Placeholder -->
                     <button type="button" class="user-menu">
                         <span class="user-avatar">CK</span>
                         <span class="user-name">User</span>
@@ -116,7 +114,6 @@
                 </div>
 
             </header>
-
 
             <!-- Page Content -->
             <section class="page-content">
@@ -129,6 +126,8 @@
         </main>
 
     </div>
+
+    {% endblock auth_content %}
 
     {% block extra_js %}{% endblock %}
 
