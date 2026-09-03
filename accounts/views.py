@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 
+from .forms import RegistrationForm
 from crm.models import Business, Membership
 
 
@@ -13,7 +13,7 @@ def register_view(request):
         return redirect("core:dashboard")
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
 
         if form.is_valid():
             try:
@@ -40,7 +40,7 @@ def register_view(request):
                 return redirect("core:dashboard")
 
     else:
-        form = UserCreationForm()
+        form = RegistrationForm()
 
     return render(
         request,

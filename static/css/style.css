@@ -1222,3 +1222,34 @@ body {
     }
 
 }
+
+.auth-message {
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background-color: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.auth-message p {
+    margin: 0;
+}
+
+.auth-forgot-password {
+    margin-top: -8px;
+    text-align: right;
+}
+
+.auth-forgot-password a {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-forgot-password a:hover {
+    text-decoration: underline;
+}
