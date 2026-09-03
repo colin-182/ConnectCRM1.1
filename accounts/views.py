@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 
 from crm.models import Business, Membership
@@ -16,22 +16,29 @@ def register_view(request):
         form = UserCreationForm(request.POST)
 
         if form.is_valid():
-            with transaction.atomic():
-                user = form.save()
+            try:
+                with transaction.atomic():
+                    user = form.save()
 
-                business = Business.objects.create(
-                    name=f"{user.username}'s Business"
+                    business = Business.objects.create(
+                        name=f"{user.username}'s Business"
+                    )
+
+                    Membership.objects.create(
+                        user=user,
+                        business=business,
+                        role=Membership.ADMIN,
+                    )
+
+            except IntegrityError:
+                form.add_error(
+                    "username",
+                    "That username is already taken. Please choose another.",
                 )
+            else:
+                login(request, user)
+                return redirect("core:dashboard")
 
-                Membership.objects.create(
-                    user=user,
-                    business=business,
-                    role=Membership.ADMIN,
-                )
-
-            login(request, user)
-
-            return redirect("core:dashboard")
     else:
         form = UserCreationForm()
 

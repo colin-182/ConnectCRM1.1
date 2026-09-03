@@ -947,6 +947,17 @@ body {
     line-height: 1.4;
 }
 
+.auth-error {
+    margin-bottom: 20px;
+    padding: 10px 12px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: var(--danger);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
 .errorlist {
     margin: 0;
     padding: 0;
