@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}ConnectCRM | Customer Relationship Management{% endblock %}
+
+{% block auth_content %}
+
+<div class="landing-page">
+
+    <header class="landing-nav">
+
+        <a href="{% url 'core:home' %}" class="landing-brand">
+            <span class="landing-brand-icon">C</span>
+            <span>ConnectCRM</span>
+        </a>
+
+        <div class="landing-nav-actions">
+            <a href="{% url 'accounts:login' %}" class="btn btn-secondary">
+                Log in
+            </a>
+
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+                Get started
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="landing-main">
+
+        <section class="landing-hero">
+
+            <p class="page-eyebrow">
+                CUSTOMER RELATIONSHIP MANAGEMENT
+            </p>
+
+            <h1>
+                Manage your customers.
+                <span>Grow your business.</span>
+            </h1>
+
+            <p class="landing-description">
+                ConnectCRM brings your companies, contacts, deals and tasks
+                together in one simple workspace, helping you stay organised
+                and focused on your sales pipeline.
+            </p>
+
+            <div class="landing-actions">
+
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+                    Create your account
+                </a>
+
+                <a href="{% url 'accounts:login' %}" class="btn btn-secondary">
+                    Log in
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <section class="landing-features">
+
+            <div class="landing-feature card">
+
+                <div class="landing-feature-icon">
+                    👥
+                </div>
+
+                <h2>
+                    Manage contacts
+                </h2>
+
+                <p>
+                    Keep customer and contact information organised
+                    and easy to access.
+                </p>
+
+            </div>
+
+
+            <div class="landing-feature card">
+
+                <div class="landing-feature-icon">
+                    ◫
+                </div>
+
+                <h2>
+                    Track your deals
+                </h2>
+
+                <p>
+                    Follow opportunities through your sales pipeline
+                    from lead to closed deal.
+                </p>
+
+            </div>
+
+
+            <div class="landing-feature card">
+
+                <div class="landing-feature-icon">
+                    ✓
+                </div>
+
+                <h2>
+                    Stay on top of tasks
+                </h2>
+
+                <p>
+                    Organise follow-ups and important actions so
+                    nothing gets missed.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="landing-footer">
+
+        <p>
+            © 2026 ConnectCRM. Customer management made simple.
+        </p>
+
+    </footer>
+
+</div>
+
+{% endblock auth_content %}

@@ -84,4 +84,4 @@ def logout_view(request):
     """Log the current user out and return to the landing page."""
 
     logout(request)
-    return redirect("core:landing")
+    return redirect("core:home")
