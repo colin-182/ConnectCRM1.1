@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import CompanyForm, ContactForm
-from .models import Company, Contact, Membership
+from .forms import CompanyForm, ContactForm, DealForm
+from .models import Company, Contact, Deal, Membership
 
 
 @login_required
@@ -328,4 +328,193 @@ def contact_delete(request, contact_id):
         request,
         "crm/contact_confirm_delete.html",
         {"contact": contact},
+    )
+
+
+@login_required
+def deal_list(request):
+    """Display deals belonging to the logged-in user's business."""
+
+    memberships = Membership.objects.filter(
+        user=request.user
+    ).select_related("business")
+
+    deals = Deal.objects.filter(
+        business__in=memberships.values("business")
+    ).select_related("company", "contact")
+
+    return render(
+        request,
+        "crm/deal_list.html",
+        {"deals": deals},
+    )
+
+
+@login_required
+def deal_create(request):
+    """Create a new deal for the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    if request.method == "POST":
+        form = DealForm(request.POST)
+
+        # Only show companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only show contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        if form.is_valid():
+            deal = form.save(commit=False)
+            deal.business = membership.business
+            deal.save()
+
+            return redirect("crm:deal_list")
+    else:
+        form = DealForm()
+
+        # Only show companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only show contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+    return render(
+        request,
+        "crm/deal_form.html",
+        {"form": form},
+    )
+
+
+@login_required
+def deal_detail(request, deal_id):
+    """Display a deal belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    deal = Deal.objects.filter(
+        id=deal_id,
+        business=membership.business,
+    ).select_related("company", "contact").first()
+
+    if deal is None:
+        return redirect("crm:deal_list")
+
+    return render(
+        request,
+        "crm/deal_detail.html",
+        {"deal": deal},
+    )
+
+
+@login_required
+def deal_edit(request, deal_id):
+    """Edit a deal belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    deal = Deal.objects.filter(
+        id=deal_id,
+        business=membership.business,
+    ).select_related("company", "contact").first()
+
+    if deal is None:
+        return redirect("crm:deal_list")
+
+    if request.method == "POST":
+        form = DealForm(request.POST, instance=deal)
+
+        # Only allow companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only allow contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "crm:deal_detail",
+                deal_id=deal.id,
+            )
+    else:
+        form = DealForm(instance=deal)
+
+        # Only allow companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only allow contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+    return render(
+        request,
+        "crm/deal_form.html",
+        {
+            "form": form,
+            "deal": deal,
+            "is_edit": True,
+        },
+    )
+
+
+@login_required
+def deal_delete(request, deal_id):
+    """Delete a deal belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    deal = Deal.objects.filter(
+        id=deal_id,
+        business=membership.business,
+    ).first()
+
+    if deal is None:
+        return redirect("crm:deal_list")
+
+    if request.method == "POST":
+        deal.delete()
+
+        return redirect("crm:deal_list")
+
+    return render(
+        request,
+        "crm/deal_confirm_delete.html",
+        {"deal": deal},
     )

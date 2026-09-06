@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Company, Contact
+from .models import Company, Contact, Deal
 
 
 class CompanyForm(forms.ModelForm):
@@ -48,4 +48,19 @@ class ContactForm(forms.ModelForm):
             "job_title",
             "email",
             "phone",
+     
+       ]
+
+
+class DealForm(forms.ModelForm):
+    """Form for creating and updating deal records."""
+
+    class Meta:
+        model = Deal
+        fields = [
+            "title",
+            "value",
+            "stage",
+            "company",
+            "contact",
         ]

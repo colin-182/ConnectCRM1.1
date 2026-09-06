@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        {% if is_edit %}
+            <h1>Edit Deal</h1>
+            <p>Update the information for {{ deal.title }}.</p>
+        {% else %}
+            <h1>Add Deal</h1>
+            <p>Create a new sales opportunity for your CRM.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="content-card">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+            <div class="form-group">
+
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="form-error">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+        <div class="form-actions">
+
+            {% if is_edit %}
+
+                <a
+                    href="{% url 'crm:deal_detail' deal.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Changes
+                </button>
+
+            {% else %}
+
+                <a
+                    href="{% url 'crm:deal_list' %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Add Deal
+                </button>
+
+            {% endif %}
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

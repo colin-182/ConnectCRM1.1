@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>{{ deal.title }}</h1>
+        <p>Deal details and sales opportunity information.</p>
+    </div>
+
+    <div class="page-actions">
+
+        <a
+            href="{% url 'crm:deal_edit' deal.id %}"
+            class="btn btn-primary"
+        >
+            Edit Deal
+        </a>
+
+        <a
+            href="{% url 'crm:deal_delete' deal.id %}"
+            class="btn btn-danger"
+        >
+            Delete Deal
+        </a>
+
+        <a
+            href="{% url 'crm:deal_list' %}"
+            class="btn btn-secondary"
+        >
+            Back to Deals
+        </a>
+
+    </div>
+
+</div>
+
+<div class="content-card">
+
+    <div class="company-detail">
+
+        <div class="detail-item">
+            <span class="detail-label">Deal</span>
+            <span class="detail-value">
+                {{ deal.title }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Value</span>
+            <span class="detail-value">
+                €{{ deal.value|floatformat:2 }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Stage</span>
+            <span class="detail-value">
+                {{ deal.get_stage_display }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Company</span>
+            <span class="detail-value">
+
+                {% if deal.company %}
+
+                    <a
+                        href="{% url 'crm:company_detail' deal.company.id %}"
+                    >
+                        {{ deal.company.name }}
+                    </a>
+
+                {% else %}
+
+                    Not assigned
+
+                {% endif %}
+
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Contact</span>
+            <span class="detail-value">
+
+                {% if deal.contact %}
+
+                    <a
+                        href="{% url 'crm:contact_detail' deal.contact.id %}"
+                    >
+                        {{ deal.contact.first_name }}
+                        {{ deal.contact.last_name }}
+                    </a>
+
+                {% else %}
+
+                    Not assigned
+
+                {% endif %}
+
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">
+                {{ deal.created_at|date:"d M Y" }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Last Updated</span>
+            <span class="detail-value">
+                {{ deal.updated_at|date:"d M Y" }}
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
