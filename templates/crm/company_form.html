@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Add Company</h1>
+        <p>Add a new company to your CRM.</p>
+    </div>
+</div>
+
+<div class="content-card">
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="form-error">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <a href="{% url 'crm:company_list' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+
+            <button type="submit" class="btn btn-primary">
+                Add Company
+            </button>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}
