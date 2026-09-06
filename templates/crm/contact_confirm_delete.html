@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Delete Contact</h1>
+        <p>Confirm that you want to remove this contact.</p>
+    </div>
+</div>
+
+<div class="content-card">
+
+    <div class="delete-confirmation">
+
+        <div class="delete-warning">
+            <h2>
+                Delete {{ contact.first_name }} {{ contact.last_name }}?
+            </h2>
+
+            <p>
+                This action will permanently remove this contact
+                from your CRM.
+            </p>
+
+            <p>
+                This cannot be undone.
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'crm:contact_detail' contact.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
+                    Delete Contact
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

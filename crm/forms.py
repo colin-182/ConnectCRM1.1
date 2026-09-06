@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Company
+from .models import Company, Contact
 
 
 class CompanyForm(forms.ModelForm):
@@ -34,3 +34,18 @@ class CompanyForm(forms.ModelForm):
             website = f"https://{website}"
 
         return website
+
+
+class ContactForm(forms.ModelForm):
+    """Form for creating and updating contact records."""
+
+    class Meta:
+        model = Contact
+        fields = [
+            "company",
+            "first_name",
+            "last_name",
+            "job_title",
+            "email",
+            "phone",
+        ]

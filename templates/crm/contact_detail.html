@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>
+            {{ contact.first_name }} {{ contact.last_name }}
+        </h1>
+
+        <p>
+            Contact details and information.
+        </p>
+    </div>
+
+    <div class="page-actions">
+
+        <a
+            href="{% url 'crm:contact_edit' contact.id %}"
+            class="btn btn-primary"
+        >
+            Edit Contact
+        </a>
+
+        <a
+            href="{% url 'crm:contact_delete' contact.id %}"
+            class="btn btn-danger"
+        >
+            Delete Contact
+        </a>
+
+        <a
+            href="{% url 'crm:contact_list' %}"
+            class="btn btn-secondary"
+        >
+            Back to Contacts
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- Contact Details -->
+
+<div class="content-card">
+
+    <div class="company-detail">
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                First Name
+            </span>
+
+            <span class="detail-value">
+                {{ contact.first_name }}
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Last Name
+            </span>
+
+            <span class="detail-value">
+                {{ contact.last_name }}
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Job Title
+            </span>
+
+            <span class="detail-value">
+
+                {% if contact.job_title %}
+                    {{ contact.job_title }}
+                {% else %}
+                    Not provided
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Company
+            </span>
+
+            <span class="detail-value">
+
+                {% if contact.company %}
+
+                    <a
+                        href="{% url 'crm:company_detail' contact.company.id %}"
+                    >
+                        {{ contact.company.name }}
+                    </a>
+
+                {% else %}
+
+                    Not assigned
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Email
+            </span>
+
+            <span class="detail-value">
+
+                {% if contact.email %}
+
+                    <a href="mailto:{{ contact.email }}">
+                        {{ contact.email }}
+                    </a>
+
+                {% else %}
+
+                    Not provided
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Phone
+            </span>
+
+            <span class="detail-value">
+
+                {% if contact.phone %}
+
+                    <a href="tel:{{ contact.phone }}">
+                        {{ contact.phone }}
+                    </a>
+
+                {% else %}
+
+                    Not provided
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <span class="detail-label">
+                Created
+            </span>
+
+            <span class="detail-value">
+                {{ contact.created_at|date:"d M Y" }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

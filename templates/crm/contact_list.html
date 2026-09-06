@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Contacts</h1>
+        <p>Manage the people connected to your customers and organisations.</p>
+    </div>
+
+    <a href="{% url 'crm:contact_create' %}" class="btn btn-primary">
+        Add Contact
+    </a>
+</div>
+
+<div class="content-card">
+
+    {% if contacts %}
+
+        <div class="company-list">
+
+            {% for contact in contacts %}
+
+                <div class="company-row">
+
+                    <div>
+                        <h3>
+                            <a href="{% url 'crm:contact_detail' contact.id %}">
+                                {{ contact.first_name }} {{ contact.last_name }}
+                            </a>
+                        </h3>
+
+                        {% if contact.job_title %}
+                            <p>{{ contact.job_title }}</p>
+                        {% endif %}
+
+                        {% if contact.company %}
+                            <p>{{ contact.company.name }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {% if contact.email %}
+                            <span>{{ contact.email }}</span>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+            <h2>No contacts yet</h2>
+            <p>
+                Start building your CRM by adding your first contact.
+            </p>
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
