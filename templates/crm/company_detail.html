@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ company.name }}</h1>
+        <p>Company details and information.</p>
+    </div>
+
+    <div class="page-actions">
+
+    <a
+        href="{% url 'crm:company_edit' company.id %}"
+        class="btn btn-primary"
+    >
+        Edit Company
+    </a>
+
+    <a
+        href="{% url 'crm:company_delete' company.id %}"
+        class="btn btn-danger"
+    >
+        Delete Company
+    </a>
+
+    <a
+        href="{% url 'crm:company_list' %}"
+        class="btn btn-secondary"
+    >
+        Back to Companies
+    </a>
+
+</div>
+
+<div class="content-card">
+
+    <div class="company-detail">
+
+        <div class="detail-item">
+            <span class="detail-label">Company Name</span>
+            <span class="detail-value">
+                {{ company.name }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Industry</span>
+            <span class="detail-value">
+                {{ company.industry|default:"Not provided" }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">
+                {% if company.phone %}
+                    <a href="tel:{{ company.phone }}">
+                        {{ company.phone }}
+                    </a>
+                {% else %}
+                    Not provided
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">
+                {% if company.email %}
+                    <a href="mailto:{{ company.email }}">
+                        {{ company.email }}
+                    </a>
+                {% else %}
+                    Not provided
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Website</span>
+            <span class="detail-value">
+                {% if company.website %}
+                    <a
+                        href="{{ company.website }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ company.website }}
+                    </a>
+                {% else %}
+                    Not provided
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">
+                {{ company.created_at|date:"d M Y" }}
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

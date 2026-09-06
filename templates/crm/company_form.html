@@ -4,8 +4,13 @@
 
 <div class="page-header">
     <div>
-        <h1>Add Company</h1>
-        <p>Add a new company to your CRM.</p>
+        {% if is_edit %}
+            <h1>Edit Company</h1>
+            <p>Update the information for {{ company.name }}.</p>
+        {% else %}
+            <h1>Add Company</h1>
+            <p>Add a new company to your CRM.</p>
+        {% endif %}
     </div>
 </div>
 
@@ -31,14 +36,31 @@
         {% endfor %}
 
         <div class="form-actions">
-            <a href="{% url 'crm:company_list' %}" class="btn btn-secondary">
-                Cancel
-            </a>
+            {% if is_edit %}
+                <a
+                    href="{% url 'crm:company_detail' company.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
 
-            <button type="submit" class="btn btn-primary">
-                Add Company
-            </button>
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+            {% else %}
+                <a
+                    href="{% url 'crm:company_list' %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    Add Company
+                </button>
+            {% endif %}
         </div>
+
     </form>
 
 </div>

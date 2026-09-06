@@ -1223,6 +1223,34 @@ body {
 
 }
 
+.btn-danger {
+    background: #dc3545;
+    color: #ffffff;
+    border: 1px solid #dc3545;
+}
+
+.btn-danger:hover {
+    background: #bb2d3b;
+    border-color: #bb2d3b;
+}
+
+.delete-confirmation {
+    max-width: 600px;
+}
+
+.delete-warning {
+    margin-bottom: 2rem;
+}
+
+.delete-warning h2 {
+    margin-bottom: 0.75rem;
+}
+
+.delete-warning p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
 .auth-message {
     margin-bottom: 24px;
     padding: 14px 16px;

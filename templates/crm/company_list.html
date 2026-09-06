@@ -19,8 +19,11 @@
             {% for company in companies %}
                 <div class="company-row">
                     <div>
-                        <h3>{{ company.name }}</h3>
-
+<h3>
+    <a href="{% url 'crm:company_detail' company.id %}">
+        {{ company.name }}
+    </a>
+</h3>
                         {% if company.industry %}
                             <p>{{ company.industry }}</p>
                         {% endif %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Delete Company</h1>
+        <p>Confirm that you want to remove this company.</p>
+    </div>
+</div>
+
+<div class="content-card">
+
+    <div class="delete-confirmation">
+
+        <div class="delete-warning">
+            <h2>Delete {{ company.name }}?</h2>
+
+            <p>
+                This action will permanently remove this company
+                from your CRM.
+            </p>
+
+            <p>
+                This cannot be undone.
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'crm:company_detail' company.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
+                    Delete Company
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
