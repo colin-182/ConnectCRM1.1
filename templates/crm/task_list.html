@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Tasks</h1>
+        <p>Manage your CRM tasks and follow-up activities.</p>
+    </div>
+
+    <div class="page-actions">
+        <a href="{% url 'crm:task_create' %}" class="btn btn-primary">
+            Add Task
+        </a>
+    </div>
+
+</div>
+
+<div class="content-card">
+
+    <div class="card-header">
+        <div>
+            <h2>All Tasks</h2>
+            <p>Tasks currently tracked in your CRM.</p>
+        </div>
+    </div>
+
+    {% if tasks %}
+
+        <div class="table-responsive">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Due Date</th>
+                        <th>Company</th>
+                        <th>Contact</th>
+                        <th>Deal</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for task in tasks %}
+
+                        <tr>
+
+                            <td>
+                                <a
+                                    href="{% url 'crm:task_detail' task.id %}"
+                                    class="table-link"
+                                >
+                                    {{ task.title }}
+                                </a>
+                            </td>
+
+                            <td>
+                                {% if task.due_date %}
+                                    {{ task.due_date|date:"d M Y" }}
+                                {% else %}
+                                    Not set
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if task.company %}
+                                    <a
+                                        href="{% url 'crm:company_detail' task.company.id %}"
+                                    >
+                                        {{ task.company.name }}
+                                    </a>
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if task.contact %}
+                                    <a
+                                        href="{% url 'crm:contact_detail' task.contact.id %}"
+                                    >
+                                        {{ task.contact.first_name }}
+                                        {{ task.contact.last_name }}
+                                    </a>
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if task.deal %}
+                                    <a
+                                        href="{% url 'crm:deal_detail' task.deal.id %}"
+                                    >
+                                        {{ task.deal.title }}
+                                    </a>
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if task.completed %}
+                                    Completed
+                                {% else %}
+                                    Open
+                                {% endif %}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <h3>No tasks yet</h3>
+
+            <p>
+                Create your first task to start tracking follow-up activities.
+            </p>
+
+            <a
+                href="{% url 'crm:task_create' %}"
+                class="btn btn-primary"
+            >
+                Add Your First Task
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

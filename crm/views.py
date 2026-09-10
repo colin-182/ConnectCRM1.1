@@ -1,8 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import CompanyForm, ContactForm, DealForm
-from .models import Company, Contact, Deal, Membership
+from .forms import CompanyForm, ContactForm, DealForm, TaskForm
+from .models import Company, Contact, Deal, Membership, Task
+
+
+# ---------------------------------------------------------------------------
+# Companies
+# ---------------------------------------------------------------------------
 
 
 @login_required
@@ -108,7 +113,10 @@ def company_edit(request, company_id):
         return redirect("crm:company_list")
 
     if request.method == "POST":
-        form = CompanyForm(request.POST, instance=company)
+        form = CompanyForm(
+            request.POST,
+            instance=company,
+        )
 
         if form.is_valid():
             form.save()
@@ -160,6 +168,11 @@ def company_delete(request, company_id):
         "crm/company_confirm_delete.html",
         {"company": company},
     )
+
+
+# ---------------------------------------------------------------------------
+# Contacts
+# ---------------------------------------------------------------------------
 
 
 @login_required
@@ -267,7 +280,10 @@ def contact_edit(request, contact_id):
         return redirect("crm:contact_list")
 
     if request.method == "POST":
-        form = ContactForm(request.POST, instance=contact)
+        form = ContactForm(
+            request.POST,
+            instance=contact,
+        )
 
         # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
@@ -329,6 +345,11 @@ def contact_delete(request, contact_id):
         "crm/contact_confirm_delete.html",
         {"contact": contact},
     )
+
+
+# ---------------------------------------------------------------------------
+# Deals
+# ---------------------------------------------------------------------------
 
 
 @login_required
@@ -446,7 +467,10 @@ def deal_edit(request, deal_id):
         return redirect("crm:deal_list")
 
     if request.method == "POST":
-        form = DealForm(request.POST, instance=deal)
+        form = DealForm(
+            request.POST,
+            instance=deal,
+        )
 
         # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
@@ -517,4 +541,219 @@ def deal_delete(request, deal_id):
         request,
         "crm/deal_confirm_delete.html",
         {"deal": deal},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+
+@login_required
+def task_list(request):
+    """Display tasks belonging to the logged-in user's business."""
+
+    memberships = Membership.objects.filter(
+        user=request.user
+    ).select_related("business")
+
+    tasks = Task.objects.filter(
+        business__in=memberships.values("business")
+    ).select_related("company", "contact", "deal")
+
+    return render(
+        request,
+        "crm/task_list.html",
+        {"tasks": tasks},
+    )
+
+
+@login_required
+def task_create(request):
+    """Create a new task for the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+
+        # Only show companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only show contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        # Only show deals belonging to the user's business.
+        form.fields["deal"].queryset = Deal.objects.filter(
+            business=membership.business
+        )
+
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.business = membership.business
+            task.save()
+
+            return redirect("crm:task_list")
+
+    else:
+        form = TaskForm()
+
+        # Only show companies belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        # Only show contacts belonging to the user's business.
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        # Only show deals belonging to the user's business.
+        form.fields["deal"].queryset = Deal.objects.filter(
+            business=membership.business
+        )
+
+    return render(
+        request,
+        "crm/task_form.html",
+        {"form": form},
+    )
+
+
+@login_required
+def task_detail(request, task_id):
+    """Display a task belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    task = Task.objects.filter(
+        id=task_id,
+        business=membership.business,
+    ).select_related("company", "contact", "deal").first()
+
+    if task is None:
+        return redirect("crm:task_list")
+
+    return render(
+        request,
+        "crm/task_detail.html",
+        {"task": task},
+    )
+
+
+@login_required
+def task_edit(request, task_id):
+    """Edit a task belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    task = Task.objects.filter(
+        id=task_id,
+        business=membership.business,
+    ).select_related("company", "contact", "deal").first()
+
+    if task is None:
+        return redirect("crm:task_list")
+
+    if request.method == "POST":
+        form = TaskForm(
+            request.POST,
+            instance=task,
+        )
+
+        # Only allow records belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        form.fields["deal"].queryset = Deal.objects.filter(
+            business=membership.business
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "crm:task_detail",
+                task_id=task.id,
+            )
+
+    else:
+        form = TaskForm(instance=task)
+
+        # Only allow records belonging to the user's business.
+        form.fields["company"].queryset = Company.objects.filter(
+            business=membership.business
+        )
+
+        form.fields["contact"].queryset = Contact.objects.filter(
+            business=membership.business
+        )
+
+        form.fields["deal"].queryset = Deal.objects.filter(
+            business=membership.business
+        )
+
+    return render(
+        request,
+        "crm/task_form.html",
+        {
+            "form": form,
+            "task": task,
+            "is_edit": True,
+        },
+    )
+
+
+@login_required
+def task_delete(request, task_id):
+    """Delete a task belonging to the logged-in user's business."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    task = Task.objects.filter(
+        id=task_id,
+        business=membership.business,
+    ).first()
+
+    if task is None:
+        return redirect("crm:task_list")
+
+    if request.method == "POST":
+        task.delete()
+
+        return redirect("crm:task_list")
+
+    return render(
+        request,
+        "crm/task_confirm_delete.html",
+        {"task": task},
     )

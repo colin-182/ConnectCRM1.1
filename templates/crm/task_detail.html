@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>{{ task.title }}</h1>
+        <p>Task details and follow-up information.</p>
+    </div>
+
+    <div class="page-actions">
+
+        <a
+            href="{% url 'crm:task_edit' task.id %}"
+            class="btn btn-primary"
+        >
+            Edit Task
+        </a>
+
+        <a
+            href="{% url 'crm:task_delete' task.id %}"
+            class="btn btn-danger"
+        >
+            Delete Task
+        </a>
+
+        <a
+            href="{% url 'crm:task_list' %}"
+            class="btn btn-secondary"
+        >
+            Back to Tasks
+        </a>
+
+    </div>
+
+</div>
+
+<div class="content-card">
+
+    <div class="company-detail">
+
+        <div class="detail-item">
+            <span class="detail-label">Task</span>
+            <span class="detail-value">
+                {{ task.title }}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Description</span>
+            <span class="detail-value">
+                {% if task.description %}
+                    {{ task.description }}
+                {% else %}
+                    Not provided
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Due Date</span>
+            <span class="detail-value">
+                {% if task.due_date %}
+                    {{ task.due_date|date:"d M Y" }}
+                {% else %}
+                    Not set
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Company</span>
+            <span class="detail-value">
+                {% if task.company %}
+                    <a href="{% url 'crm:company_detail' task.company.id %}">
+                        {{ task.company.name }}
+                    </a>
+                {% else %}
+                    Not assigned
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Contact</span>
+            <span class="detail-value">
+                {% if task.contact %}
+                    <a href="{% url 'crm:contact_detail' task.contact.id %}">
+                        {{ task.contact.first_name }}
+                        {{ task.contact.last_name }}
+                    </a>
+                {% else %}
+                    Not assigned
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Deal</span>
+            <span class="detail-value">
+                {% if task.deal %}
+                    <a href="{% url 'crm:deal_detail' task.deal.id %}">
+                        {{ task.deal.title }}
+                    </a>
+                {% else %}
+                    Not assigned
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+                {% if task.completed %}
+                    Completed
+                {% else %}
+                    Open
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">
+                {{ task.created_at|date:"d M Y" }}
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

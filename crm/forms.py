@@ -1,7 +1,6 @@
 from django import forms
 
-from .models import Company, Contact, Deal
-
+from .models import Company, Contact, Deal, Task
 
 class CompanyForm(forms.ModelForm):
     """Form for creating and updating company records."""
@@ -63,4 +62,29 @@ class DealForm(forms.ModelForm):
             "stage",
             "company",
             "contact",
+        ]
+
+
+class TaskForm(forms.ModelForm):
+    """Form for creating and updating task records."""
+
+    due_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "type": "date",
+            }
+        ),
+    )
+
+    class Meta:
+        model = Task
+        fields = [
+            "title",
+            "description",
+            "due_date",
+            "company",
+            "contact",
+            "deal",
+            "completed",
         ]
