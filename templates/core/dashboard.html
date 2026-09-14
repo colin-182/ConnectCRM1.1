@@ -356,6 +356,10 @@
 
                             {{ task.due_date|date:"d M Y" }}
 
+                            {% if task.due_time %}
+                                 | {{ task.due_time|time:"H:i" }}
+                            {% endif %}
+
                         </p>
 
                     </div>

@@ -2,6 +2,7 @@ from django import forms
 
 from .models import Company, Contact, Deal, Task
 
+
 class CompanyForm(forms.ModelForm):
     """Form for creating and updating company records."""
 
@@ -47,8 +48,7 @@ class ContactForm(forms.ModelForm):
             "job_title",
             "email",
             "phone",
-     
-       ]
+        ]
 
 
 class DealForm(forms.ModelForm):
@@ -77,12 +77,22 @@ class TaskForm(forms.ModelForm):
         ),
     )
 
+    due_time = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(
+            attrs={
+                "type": "time",
+            }
+        ),
+    )
+
     class Meta:
         model = Task
         fields = [
             "title",
             "description",
             "due_date",
+            "due_time",
             "company",
             "contact",
             "deal",

@@ -79,7 +79,8 @@ def dashboard(request):
         "contact",
         "deal",
     ).order_by(
-        "due_date"
+        "due_date",
+        "due_time",
     )[:4]
 
     # ------------------------------------------------------------------
@@ -130,7 +131,9 @@ def dashboard(request):
                 "type": "company",
                 "icon": "🏢",
                 "title": "New company added",
-                "description": f"{company.name} was added to your companies.",
+                "description": (
+                    f"{company.name} was added to your companies."
+                ),
                 "timestamp": company.created_at,
             }
         )
@@ -181,7 +184,9 @@ def dashboard(request):
                 "type": "task",
                 "icon": "✔️",
                 "title": "Task created",
-                "description": f"{task.title} was added to your tasks.",
+                "description": (
+                    f"{task.title} was added to your tasks."
+                ),
                 "timestamp": task.created_at,
             }
         )

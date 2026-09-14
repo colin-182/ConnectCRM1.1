@@ -1,12 +1,17 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 
 
 class Business(models.Model):
-    """Represents a business using ConnectCRM."""
+    """A business account that owns CRM records."""
 
-    name = models.CharField(max_length=150)
-    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(
+        max_length=200,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
         ordering = ["name"]
@@ -16,7 +21,7 @@ class Business(models.Model):
 
 
 class Membership(models.Model):
-    """Links a Django user to a business and defines their CRM role."""
+    """Connect a user to a business with a specific role."""
 
     ADMIN = "admin"
     SALES = "sales"
@@ -29,15 +34,17 @@ class Membership(models.Model):
     ]
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="memberships",
     )
+
     business = models.ForeignKey(
         Business,
         on_delete=models.CASCADE,
         related_name="memberships",
     )
+
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
@@ -57,19 +64,39 @@ class Membership(models.Model):
 
 
 class Company(models.Model):
-    """Stores a company belonging to a ConnectCRM business."""
+    """A company belonging to a business."""
 
     business = models.ForeignKey(
         Business,
         on_delete=models.CASCADE,
         related_name="companies",
     )
-    name = models.CharField(max_length=150)
-    industry = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=50, blank=True)
-    email = models.EmailField(blank=True)
-    website = models.URLField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    name = models.CharField(
+        max_length=200,
+    )
+
+    industry = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    phone = models.CharField(
+        max_length=50,
+        blank=True,
+    )
+
+    email = models.EmailField(
+        blank=True,
+    )
+
+    website = models.URLField(
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
         ordering = ["name"]
@@ -79,13 +106,14 @@ class Company(models.Model):
 
 
 class Contact(models.Model):
-    """Stores an individual contact belonging to a ConnectCRM business."""
+    """A contact belonging to a business and optionally linked to a company."""
 
     business = models.ForeignKey(
         Business,
         on_delete=models.CASCADE,
         related_name="contacts",
     )
+
     company = models.ForeignKey(
         Company,
         on_delete=models.SET_NULL,
@@ -93,12 +121,32 @@ class Contact(models.Model):
         blank=True,
         related_name="contacts",
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    job_title = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(blank=True)
-    phone = models.CharField(max_length=50, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    first_name = models.CharField(
+        max_length=100,
+    )
+
+    last_name = models.CharField(
+        max_length=100,
+    )
+
+    job_title = models.CharField(
+        max_length=150,
+        blank=True,
+    )
+
+    email = models.EmailField(
+        blank=True,
+    )
+
+    phone = models.CharField(
+        max_length=50,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
         ordering = ["last_name", "first_name"]
@@ -108,7 +156,7 @@ class Contact(models.Model):
 
 
 class Deal(models.Model):
-    """Stores a sales opportunity belonging to a ConnectCRM business."""
+    """A sales opportunity belonging to a business."""
 
     LEAD = "lead"
     QUALIFIED = "qualified"
@@ -131,6 +179,7 @@ class Deal(models.Model):
         on_delete=models.CASCADE,
         related_name="deals",
     )
+
     company = models.ForeignKey(
         Company,
         on_delete=models.SET_NULL,
@@ -138,6 +187,7 @@ class Deal(models.Model):
         blank=True,
         related_name="deals",
     )
+
     contact = models.ForeignKey(
         Contact,
         on_delete=models.SET_NULL,
@@ -145,19 +195,30 @@ class Deal(models.Model):
         blank=True,
         related_name="deals",
     )
-    title = models.CharField(max_length=200)
+
+    title = models.CharField(
+        max_length=200,
+    )
+
     value = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0,
     )
+
     stage = models.CharField(
         max_length=20,
         choices=STAGE_CHOICES,
         default=LEAD,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     class Meta:
         ordering = ["-updated_at"]
@@ -167,13 +228,14 @@ class Deal(models.Model):
 
 
 class Task(models.Model):
-    """Stores an action or follow-up belonging to a ConnectCRM business."""
+    """A CRM task that can be associated with companies, contacts and deals."""
 
     business = models.ForeignKey(
         Business,
         on_delete=models.CASCADE,
         related_name="tasks",
     )
+
     company = models.ForeignKey(
         Company,
         on_delete=models.SET_NULL,
@@ -181,6 +243,7 @@ class Task(models.Model):
         blank=True,
         related_name="tasks",
     )
+
     contact = models.ForeignKey(
         Contact,
         on_delete=models.SET_NULL,
@@ -188,6 +251,7 @@ class Task(models.Model):
         blank=True,
         related_name="tasks",
     )
+
     deal = models.ForeignKey(
         Deal,
         on_delete=models.SET_NULL,
@@ -195,14 +259,35 @@ class Task(models.Model):
         blank=True,
         related_name="tasks",
     )
-    title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
-    completed = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    title = models.CharField(
+        max_length=200,
+    )
+
+    description = models.TextField(
+        blank=True,
+    )
+
+    due_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    due_time = models.TimeField(
+        null=True,
+        blank=True,
+    )
+
+    completed = models.BooleanField(
+        default=False,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
-        ordering = ["completed", "due_date", "-created_at"]
+        ordering = ["due_date", "due_time", "-created_at"]
 
     def __str__(self):
         return self.title

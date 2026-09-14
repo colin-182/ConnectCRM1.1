@@ -70,6 +70,17 @@
         </div>
 
         <div class="detail-item">
+            <span class="detail-label">Due Time</span>
+            <span class="detail-value">
+                {% if task.due_time %}
+                    {{ task.due_time|time:"H:i" }}
+                {% else %}
+                    Not set
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detail-item">
             <span class="detail-label">Company</span>
             <span class="detail-value">
                 {% if task.company %}
