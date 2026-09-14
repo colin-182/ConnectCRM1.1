@@ -9,6 +9,11 @@ class Business(models.Model):
         max_length=200,
     )
 
+    slug = models.SlugField(
+        max_length=100,
+        unique=True,
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -62,6 +67,60 @@ class Membership(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.business.name}"
 
+
+class Invitation(models.Model):
+    """An invitation for a user to join a specific business."""
+
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name="invitations",
+    )
+
+    email = models.EmailField()
+
+    role = models.CharField(
+        max_length=20,
+        choices=Membership.ROLE_CHOICES,
+        default=Membership.MEMBER,
+    )
+
+    token = models.CharField(
+        max_length=64,
+        unique=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    expires_at = models.DateTimeField()
+
+    accepted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.email} - {self.business.name}"
+
+    @property
+    def is_accepted(self):
+        """Return whether the invitation has already been accepted."""
+
+        return self.accepted_at is not None
+
+    @property
+    def is_expired(self):
+        """Return whether the invitation has passed its expiry time."""
+
+        from django.utils import timezone
+
+        return timezone.now() >= self.expires_at
+        
 
 class Company(models.Model):
     """A company belonging to a business."""

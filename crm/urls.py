@@ -80,4 +80,16 @@ urlpatterns = [
         views.task_delete,
         name="task_delete",
     ),
+
+    # Invitations
+    path(
+        "invitations/add/",
+        views.invitation_create,
+        name="invitation_create",
+    ),
+    path(
+        "invitations/<str:token>/",
+        views.invitation_accept,
+        name="invitation_accept",
+    ),
 ]

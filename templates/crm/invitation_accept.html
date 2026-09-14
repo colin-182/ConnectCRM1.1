@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>ConnectCRM invitation</h1>
+    </div>
+</div>
+
+<div class="form-card">
+
+    {% if invalid_invitation %}
+
+        <h2>Invitation unavailable</h2>
+
+        <p>
+            This invitation is invalid, has expired, or has already been accepted.
+        </p>
+
+        <div class="form-actions">
+            <a href="{% url 'core:home' %}" class="btn btn-primary">
+                Return to ConnectCRM
+            </a>
+        </div>
+
+    {% else %}
+
+        <h2>You're invited</h2>
+
+        <p>
+            You have been invited to join:
+        </p>
+
+        <p>
+            <strong>{{ invitation.business.name }}</strong>
+        </p>
+
+        <p>
+            Role:
+            <strong>{{ invitation.get_role_display }}</strong>
+        </p>
+
+        <p>
+            Invitation expires on
+            <strong>{{ invitation.expires_at|date:"j F Y" }}</strong>.
+        </p>
+
+        <div class="form-actions">
+            <a
+                href="{% url 'accounts:register' %}?invitation={{ invitation.token }}"
+                class="btn btn-primary"
+            >
+                Accept invitation
+            </a>
+
+            <a href="{% url 'core:home' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

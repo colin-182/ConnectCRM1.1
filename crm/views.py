@@ -1,8 +1,12 @@
+from datetime import timedelta
+import secrets
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
-from .forms import CompanyForm, ContactForm, DealForm, TaskForm
-from .models import Company, Contact, Deal, Membership, Task
+from .forms import CompanyForm, ContactForm, DealForm, InvitationForm, TaskForm
+from .models import Company, Contact, Deal, Invitation, Membership, Task
 
 
 # ---------------------------------------------------------------------------
@@ -208,7 +212,6 @@ def contact_create(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -222,7 +225,6 @@ def contact_create(request):
     else:
         form = ContactForm()
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -285,7 +287,6 @@ def contact_edit(request, contact_id):
             instance=contact,
         )
 
-        # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -300,7 +301,6 @@ def contact_edit(request, contact_id):
     else:
         form = ContactForm(instance=contact)
 
-        # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -385,12 +385,10 @@ def deal_create(request):
     if request.method == "POST":
         form = DealForm(request.POST)
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only show contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
@@ -404,12 +402,10 @@ def deal_create(request):
     else:
         form = DealForm()
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only show contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
@@ -472,12 +468,10 @@ def deal_edit(request, deal_id):
             instance=deal,
         )
 
-        # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only allow contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
@@ -492,12 +486,10 @@ def deal_edit(request, deal_id):
     else:
         form = DealForm(instance=deal)
 
-        # Only allow companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only allow contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
@@ -582,17 +574,14 @@ def task_create(request):
     if request.method == "POST":
         form = TaskForm(request.POST)
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only show contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
 
-        # Only show deals belonging to the user's business.
         form.fields["deal"].queryset = Deal.objects.filter(
             business=membership.business
         )
@@ -607,17 +596,14 @@ def task_create(request):
     else:
         form = TaskForm()
 
-        # Only show companies belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
 
-        # Only show contacts belonging to the user's business.
         form.fields["contact"].queryset = Contact.objects.filter(
             business=membership.business
         )
 
-        # Only show deals belonging to the user's business.
         form.fields["deal"].queryset = Deal.objects.filter(
             business=membership.business
         )
@@ -680,7 +666,6 @@ def task_edit(request, task_id):
             instance=task,
         )
 
-        # Only allow records belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -704,7 +689,6 @@ def task_edit(request, task_id):
     else:
         form = TaskForm(instance=task)
 
-        # Only allow records belonging to the user's business.
         form.fields["company"].queryset = Company.objects.filter(
             business=membership.business
         )
@@ -756,4 +740,84 @@ def task_delete(request, task_id):
         request,
         "crm/task_confirm_delete.html",
         {"task": task},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Invitations
+# ---------------------------------------------------------------------------
+
+
+@login_required
+def invitation_create(request):
+    """Allow a business administrator to invite a user."""
+
+    membership = Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+    if membership is None:
+        return redirect("core:dashboard")
+
+    if membership.role != Membership.ADMIN:
+        return redirect("core:dashboard")
+
+    if request.method == "POST":
+        form = InvitationForm(request.POST)
+
+        if form.is_valid():
+            invitation = form.save(commit=False)
+
+            invitation.business = membership.business
+            invitation.token = secrets.token_urlsafe(48)
+            invitation.expires_at = timezone.now() + timedelta(days=7)
+
+            invitation.save()
+
+            return redirect("crm:invitation_create")
+    else:
+        form = InvitationForm()
+
+    return render(
+        request,
+        "crm/invitation_form.html",
+        {
+            "form": form,
+            "business": membership.business,
+        },
+    )
+
+
+def invitation_accept(request, token):
+    """Validate an invitation token and display the acceptance page."""
+
+    invitation = Invitation.objects.filter(
+        token=token,
+    ).select_related("business").first()
+
+    if invitation is None:
+        return render(
+            request,
+            "crm/invitation_accept.html",
+            {
+                "invalid_invitation": True,
+            },
+        )
+
+    if invitation.is_accepted or invitation.is_expired:
+        return render(
+            request,
+            "crm/invitation_accept.html",
+            {
+                "invalid_invitation": True,
+                "invitation": invitation,
+            },
+        )
+
+    return render(
+        request,
+        "crm/invitation_accept.html",
+        {
+            "invitation": invitation,
+        },
     )

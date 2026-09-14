@@ -1,19 +1,10 @@
 from django import forms
 
-from .models import Company, Contact, Deal, Task
+from .models import Company, Contact, Deal, Invitation, Membership, Task
 
 
 class CompanyForm(forms.ModelForm):
-    """Form for creating and updating company records."""
-
-    website = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "e.g. microsoft.com",
-            }
-        ),
-    )
+    """Form used to create and edit companies."""
 
     class Meta:
         model = Company
@@ -25,19 +16,9 @@ class CompanyForm(forms.ModelForm):
             "website",
         ]
 
-    def clean_website(self):
-        """Add HTTPS to the website if the user omits the protocol."""
-
-        website = self.cleaned_data.get("website")
-
-        if website and not website.startswith(("http://", "https://")):
-            website = f"https://{website}"
-
-        return website
-
 
 class ContactForm(forms.ModelForm):
-    """Form for creating and updating contact records."""
+    """Form used to create and edit contacts."""
 
     class Meta:
         model = Contact
@@ -52,49 +33,85 @@ class ContactForm(forms.ModelForm):
 
 
 class DealForm(forms.ModelForm):
-    """Form for creating and updating deal records."""
+    """Form used to create and edit deals."""
 
     class Meta:
         model = Deal
         fields = [
+            "company",
+            "contact",
             "title",
             "value",
             "stage",
-            "company",
-            "contact",
         ]
 
 
 class TaskForm(forms.ModelForm):
-    """Form for creating and updating task records."""
-
-    due_date = forms.DateField(
-        required=False,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-            }
-        ),
-    )
-
-    due_time = forms.TimeField(
-        required=False,
-        widget=forms.TimeInput(
-            attrs={
-                "type": "time",
-            }
-        ),
-    )
+    """Form used to create and edit CRM tasks."""
 
     class Meta:
         model = Task
         fields = [
+            "company",
+            "contact",
+            "deal",
             "title",
             "description",
             "due_date",
             "due_time",
-            "company",
-            "contact",
-            "deal",
             "completed",
         ]
+
+        widgets = {
+            "due_date": forms.DateInput(
+                attrs={
+                    "type": "date",
+                }
+            ),
+            "due_time": forms.TimeInput(
+                attrs={
+                    "type": "time",
+                }
+            ),
+        }
+
+
+class InvitationForm(forms.ModelForm):
+    """Form used by business administrators to invite new users."""
+
+    class Meta:
+        model = Invitation
+        fields = [
+            "email",
+            "role",
+        ]
+
+        widgets = {
+            "email": forms.EmailInput(
+                attrs={
+                    "autocomplete": "email",
+                    "placeholder": "Enter email address",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """Limit invitation roles to non-administrative roles."""
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["role"].choices = [
+            (
+                Membership.SALES,
+                "Sales",
+            ),
+            (
+                Membership.MEMBER,
+                "Member",
+            ),
+        ]
+
+    def clean_email(self):
+        """Return the invitation email address in lowercase."""
+
+        return self.cleaned_data["email"].lower()

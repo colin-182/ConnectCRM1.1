@@ -16,16 +16,33 @@
         <div class="auth-header">
             <p class="page-eyebrow">GET STARTED</p>
 
-            <h1>Create your account</h1>
+            {% if invitation %}
+                <h1>Join {{ invitation.business.name }}</h1>
 
-            <p>
-                Start managing your customers and sales in one place.
-            </p>
+                <p>
+                    You've been invited to join ConnectCRM as
+                    <strong>{{ invitation.get_role_display }}</strong>.
+                </p>
+            {% else %}
+                <h1>Create your account</h1>
+
+                <p>
+                    Start managing your customers and sales in one place.
+                </p>
+            {% endif %}
         </div>
 
         <form method="post" class="auth-form">
 
             {% csrf_token %}
+
+            {% if invitation_token %}
+                <input
+                    type="hidden"
+                    name="invitation"
+                    value="{{ invitation_token }}"
+                >
+            {% endif %}
 
             {{ form.non_field_errors }}
 
@@ -50,6 +67,12 @@
                 </label>
 
                 {{ form.email }}
+
+                {% if invitation %}
+                    <p>
+                        Use the email address that received this invitation.
+                    </p>
+                {% endif %}
 
                 {% for error in form.email.errors %}
                     <p class="form-error">{{ error }}</p>
@@ -86,7 +109,11 @@
             </div>
 
             <button type="submit" class="btn btn-primary auth-submit">
-                Create account
+                {% if invitation %}
+                    Join business
+                {% else %}
+                    Create account
+                {% endif %}
             </button>
 
         </form>
