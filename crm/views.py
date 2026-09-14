@@ -2,11 +2,63 @@ from datetime import timedelta
 import secrets
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import CompanyForm, ContactForm, DealForm, InvitationForm, TaskForm
 from .models import Company, Contact, Deal, Invitation, Membership, Task
+
+
+def _get_membership(request):
+    """Return the logged-in user's ConnectCRM membership, if one exists."""
+
+    return Membership.objects.filter(
+        user=request.user
+    ).select_related("business").first()
+
+
+def _get_business(request):
+    """Return the business belonging to the logged-in user's membership."""
+
+    membership = _get_membership(request)
+
+    if membership is None:
+        return None
+
+    return membership.business
+
+
+def _set_contact_form_queryset(form, business):
+    """Limit contact form company choices to the current business."""
+
+    form.fields["company"].queryset = Company.objects.filter(
+        business=business
+    )
+
+
+def _set_deal_form_queryset(form, business):
+    """Limit deal form relationship choices to the current business."""
+
+    form.fields["company"].queryset = Company.objects.filter(
+        business=business
+    )
+    form.fields["contact"].queryset = Contact.objects.filter(
+        business=business
+    )
+
+
+def _set_task_form_queryset(form, business):
+    """Limit task form relationship choices to the current business."""
+
+    form.fields["company"].queryset = Company.objects.filter(
+        business=business
+    )
+    form.fields["contact"].queryset = Contact.objects.filter(
+        business=business
+    )
+    form.fields["deal"].queryset = Deal.objects.filter(
+        business=business
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -18,12 +70,13 @@ from .models import Company, Contact, Deal, Invitation, Membership, Task
 def company_list(request):
     """Display companies belonging to the logged-in user's business."""
 
-    memberships = Membership.objects.filter(
-        user=request.user
-    ).select_related("business")
+    business = _get_business(request)
+
+    if business is None:
+        return redirect("core:dashboard")
 
     companies = Company.objects.filter(
-        business__in=memberships.values("business")
+        business=business
     )
 
     return render(
@@ -37,11 +90,9 @@ def company_list(request):
 def company_create(request):
     """Create a new company for the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
     if request.method == "POST":
@@ -49,7 +100,7 @@ def company_create(request):
 
         if form.is_valid():
             company = form.save(commit=False)
-            company.business = membership.business
+            company.business = business
             company.save()
 
             return redirect("crm:company_list")
@@ -67,24 +118,20 @@ def company_create(request):
 def company_detail(request, company_id):
     """Display a company and its contacts."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    company = Company.objects.filter(
+    company = get_object_or_404(
+        Company,
         id=company_id,
-        business=membership.business,
-    ).first()
-
-    if company is None:
-        return redirect("crm:company_list")
+        business=business,
+    )
 
     contacts = Contact.objects.filter(
         company=company,
-        business=membership.business,
+        business=business,
     )
 
     return render(
@@ -101,20 +148,16 @@ def company_detail(request, company_id):
 def company_edit(request, company_id):
     """Edit a company belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    company = Company.objects.filter(
+    company = get_object_or_404(
+        Company,
         id=company_id,
-        business=membership.business,
-    ).first()
-
-    if company is None:
-        return redirect("crm:company_list")
+        business=business,
+    )
 
     if request.method == "POST":
         form = CompanyForm(
@@ -147,20 +190,16 @@ def company_edit(request, company_id):
 def company_delete(request, company_id):
     """Delete a company belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    company = Company.objects.filter(
+    company = get_object_or_404(
+        Company,
         id=company_id,
-        business=membership.business,
-    ).first()
-
-    if company is None:
-        return redirect("crm:company_list")
+        business=business,
+    )
 
     if request.method == "POST":
         company.delete()
@@ -183,12 +222,13 @@ def company_delete(request, company_id):
 def contact_list(request):
     """Display contacts belonging to the logged-in user's business."""
 
-    memberships = Membership.objects.filter(
-        user=request.user
-    ).select_related("business")
+    business = _get_business(request)
+
+    if business is None:
+        return redirect("core:dashboard")
 
     contacts = Contact.objects.filter(
-        business__in=memberships.values("business")
+        business=business
     ).select_related("company")
 
     return render(
@@ -202,32 +242,24 @@ def contact_list(request):
 def contact_create(request):
     """Create a new contact for the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
     if request.method == "POST":
         form = ContactForm(request.POST)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
+        _set_contact_form_queryset(form, business)
 
         if form.is_valid():
             contact = form.save(commit=False)
-            contact.business = membership.business
+            contact.business = business
             contact.save()
 
             return redirect("crm:contact_list")
     else:
         form = ContactForm()
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
+        _set_contact_form_queryset(form, business)
 
     return render(
         request,
@@ -240,20 +272,16 @@ def contact_create(request):
 def contact_detail(request, contact_id):
     """Display a contact belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    contact = Contact.objects.filter(
+    contact = get_object_or_404(
+        Contact.objects.select_related("company"),
         id=contact_id,
-        business=membership.business,
-    ).select_related("company").first()
-
-    if contact is None:
-        return redirect("crm:contact_list")
+        business=business,
+    )
 
     return render(
         request,
@@ -266,30 +294,23 @@ def contact_detail(request, contact_id):
 def contact_edit(request, contact_id):
     """Edit a contact belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    contact = Contact.objects.filter(
+    contact = get_object_or_404(
+        Contact.objects.select_related("company"),
         id=contact_id,
-        business=membership.business,
-    ).select_related("company").first()
-
-    if contact is None:
-        return redirect("crm:contact_list")
+        business=business,
+    )
 
     if request.method == "POST":
         form = ContactForm(
             request.POST,
             instance=contact,
         )
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
+        _set_contact_form_queryset(form, business)
 
         if form.is_valid():
             form.save()
@@ -300,10 +321,7 @@ def contact_edit(request, contact_id):
             )
     else:
         form = ContactForm(instance=contact)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
+        _set_contact_form_queryset(form, business)
 
     return render(
         request,
@@ -320,20 +338,16 @@ def contact_edit(request, contact_id):
 def contact_delete(request, contact_id):
     """Delete a contact belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    contact = Contact.objects.filter(
+    contact = get_object_or_404(
+        Contact,
         id=contact_id,
-        business=membership.business,
-    ).first()
-
-    if contact is None:
-        return redirect("crm:contact_list")
+        business=business,
+    )
 
     if request.method == "POST":
         contact.delete()
@@ -356,12 +370,13 @@ def contact_delete(request, contact_id):
 def deal_list(request):
     """Display deals belonging to the logged-in user's business."""
 
-    memberships = Membership.objects.filter(
-        user=request.user
-    ).select_related("business")
+    business = _get_business(request)
+
+    if business is None:
+        return redirect("core:dashboard")
 
     deals = Deal.objects.filter(
-        business__in=memberships.values("business")
+        business=business
     ).select_related("company", "contact")
 
     return render(
@@ -375,40 +390,24 @@ def deal_list(request):
 def deal_create(request):
     """Create a new deal for the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
     if request.method == "POST":
         form = DealForm(request.POST)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
+        _set_deal_form_queryset(form, business)
 
         if form.is_valid():
             deal = form.save(commit=False)
-            deal.business = membership.business
+            deal.business = business
             deal.save()
 
             return redirect("crm:deal_list")
     else:
         form = DealForm()
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
+        _set_deal_form_queryset(form, business)
 
     return render(
         request,
@@ -421,20 +420,16 @@ def deal_create(request):
 def deal_detail(request, deal_id):
     """Display a deal belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    deal = Deal.objects.filter(
+    deal = get_object_or_404(
+        Deal.objects.select_related("company", "contact"),
         id=deal_id,
-        business=membership.business,
-    ).select_related("company", "contact").first()
-
-    if deal is None:
-        return redirect("crm:deal_list")
+        business=business,
+    )
 
     return render(
         request,
@@ -447,34 +442,23 @@ def deal_detail(request, deal_id):
 def deal_edit(request, deal_id):
     """Edit a deal belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    deal = Deal.objects.filter(
+    deal = get_object_or_404(
+        Deal.objects.select_related("company", "contact"),
         id=deal_id,
-        business=membership.business,
-    ).select_related("company", "contact").first()
-
-    if deal is None:
-        return redirect("crm:deal_list")
+        business=business,
+    )
 
     if request.method == "POST":
         form = DealForm(
             request.POST,
             instance=deal,
         )
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
+        _set_deal_form_queryset(form, business)
 
         if form.is_valid():
             form.save()
@@ -485,14 +469,7 @@ def deal_edit(request, deal_id):
             )
     else:
         form = DealForm(instance=deal)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
+        _set_deal_form_queryset(form, business)
 
     return render(
         request,
@@ -509,20 +486,16 @@ def deal_edit(request, deal_id):
 def deal_delete(request, deal_id):
     """Delete a deal belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    deal = Deal.objects.filter(
+    deal = get_object_or_404(
+        Deal,
         id=deal_id,
-        business=membership.business,
-    ).first()
-
-    if deal is None:
-        return redirect("crm:deal_list")
+        business=business,
+    )
 
     if request.method == "POST":
         deal.delete()
@@ -545,12 +518,13 @@ def deal_delete(request, deal_id):
 def task_list(request):
     """Display tasks belonging to the logged-in user's business."""
 
-    memberships = Membership.objects.filter(
-        user=request.user
-    ).select_related("business")
+    business = _get_business(request)
+
+    if business is None:
+        return redirect("core:dashboard")
 
     tasks = Task.objects.filter(
-        business__in=memberships.values("business")
+        business=business
     ).select_related("company", "contact", "deal")
 
     return render(
@@ -564,49 +538,24 @@ def task_list(request):
 def task_create(request):
     """Create a new task for the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
     if request.method == "POST":
         form = TaskForm(request.POST)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["deal"].queryset = Deal.objects.filter(
-            business=membership.business
-        )
+        _set_task_form_queryset(form, business)
 
         if form.is_valid():
             task = form.save(commit=False)
-            task.business = membership.business
+            task.business = business
             task.save()
 
             return redirect("crm:task_list")
-
     else:
         form = TaskForm()
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["deal"].queryset = Deal.objects.filter(
-            business=membership.business
-        )
+        _set_task_form_queryset(form, business)
 
     return render(
         request,
@@ -619,20 +568,16 @@ def task_create(request):
 def task_detail(request, task_id):
     """Display a task belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    task = Task.objects.filter(
+    task = get_object_or_404(
+        Task.objects.select_related("company", "contact", "deal"),
         id=task_id,
-        business=membership.business,
-    ).select_related("company", "contact", "deal").first()
-
-    if task is None:
-        return redirect("crm:task_list")
+        business=business,
+    )
 
     return render(
         request,
@@ -645,38 +590,23 @@ def task_detail(request, task_id):
 def task_edit(request, task_id):
     """Edit a task belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    task = Task.objects.filter(
+    task = get_object_or_404(
+        Task.objects.select_related("company", "contact", "deal"),
         id=task_id,
-        business=membership.business,
-    ).select_related("company", "contact", "deal").first()
-
-    if task is None:
-        return redirect("crm:task_list")
+        business=business,
+    )
 
     if request.method == "POST":
         form = TaskForm(
             request.POST,
             instance=task,
         )
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["deal"].queryset = Deal.objects.filter(
-            business=membership.business
-        )
+        _set_task_form_queryset(form, business)
 
         if form.is_valid():
             form.save()
@@ -688,18 +618,7 @@ def task_edit(request, task_id):
 
     else:
         form = TaskForm(instance=task)
-
-        form.fields["company"].queryset = Company.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["contact"].queryset = Contact.objects.filter(
-            business=membership.business
-        )
-
-        form.fields["deal"].queryset = Deal.objects.filter(
-            business=membership.business
-        )
+        _set_task_form_queryset(form, business)
 
     return render(
         request,
@@ -716,20 +635,16 @@ def task_edit(request, task_id):
 def task_delete(request, task_id):
     """Delete a task belonging to the logged-in user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    business = _get_business(request)
 
-    if membership is None:
+    if business is None:
         return redirect("core:dashboard")
 
-    task = Task.objects.filter(
+    task = get_object_or_404(
+        Task,
         id=task_id,
-        business=membership.business,
-    ).first()
-
-    if task is None:
-        return redirect("crm:task_list")
+        business=business,
+    )
 
     if request.method == "POST":
         task.delete()
@@ -752,9 +667,7 @@ def task_delete(request, task_id):
 def invitation_create(request):
     """Allow a business administrator to invite a user."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    membership = _get_membership(request)
 
     if membership is None:
         return redirect("core:dashboard")
