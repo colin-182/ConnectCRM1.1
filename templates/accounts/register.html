@@ -14,116 +14,151 @@
         </div>
 
         <div class="auth-header">
-            <p class="page-eyebrow">GET STARTED</p>
 
             {% if invitation %}
-                <h1>Join {{ invitation.business.name }}</h1>
+
+                <p class="page-eyebrow">JOIN YOUR TEAM</p>
+
+                <h1>Accept your invitation</h1>
 
                 <p>
-                    You've been invited to join ConnectCRM as
+                    Create your account to join
+                    <strong>{{ invitation.business.name }}</strong>.
+                </p>
+
+                <p>
+                    Your role will be
                     <strong>{{ invitation.get_role_display }}</strong>.
                 </p>
+
             {% else %}
+
+                <p class="page-eyebrow">GET STARTED</p>
+
                 <h1>Create your account</h1>
 
                 <p>
                     Start managing your customers and sales in one place.
                 </p>
+
             {% endif %}
+
         </div>
 
-        <form method="post" class="auth-form">
+        {% if invalid_invitation %}
 
-            {% csrf_token %}
+            <div class="form-error">
+                This invitation is invalid, has expired, or has already
+                been accepted.
+            </div>
 
-            {% if invitation_token %}
-                <input
-                    type="hidden"
-                    name="invitation"
-                    value="{{ invitation_token }}"
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'core:home' %}"
+                    class="btn btn-primary"
                 >
-            {% endif %}
-
-            {{ form.non_field_errors }}
-
-            <div class="form-group">
-
-                <label for="{{ form.username.id_for_label }}">
-                    Username
-                </label>
-
-                {{ form.username }}
-
-                {% for error in form.username.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
+                    Return to ConnectCRM
+                </a>
 
             </div>
 
-            <div class="form-group">
+        {% else %}
 
-                <label for="{{ form.email.id_for_label }}">
-                    Email address
-                </label>
+            <form method="post" class="auth-form">
 
-                {{ form.email }}
+                {% csrf_token %}
 
                 {% if invitation %}
-                    <p>
-                        Use the email address that received this invitation.
-                    </p>
+                    <input
+                        type="hidden"
+                        name="invitation"
+                        value="{{ invitation.token }}"
+                    >
                 {% endif %}
 
-                {% for error in form.email.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
+                {{ form.non_field_errors }}
 
-            </div>
+                <div class="form-group">
 
-            <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">
+                        Username
+                    </label>
 
-                <label for="{{ form.password1.id_for_label }}">
-                    Password
-                </label>
+                    {{ form.username }}
 
-                {{ form.password1 }}
+                    {% for error in form.username.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
 
-                {% for error in form.password1.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
+                </div>
 
-            </div>
+                <div class="form-group">
 
-            <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">
+                        Email address
+                    </label>
 
-                <label for="{{ form.password2.id_for_label }}">
-                    Confirm password
-                </label>
+                    {{ form.email }}
 
-                {{ form.password2 }}
+                    {% for error in form.email.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
 
-                {% for error in form.password2.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
+                </div>
 
-            </div>
+                <div class="form-group">
 
-            <button type="submit" class="btn btn-primary auth-submit">
-                {% if invitation %}
-                    Join business
-                {% else %}
-                    Create account
-                {% endif %}
-            </button>
+                    <label for="{{ form.password1.id_for_label }}">
+                        Password
+                    </label>
 
-        </form>
+                    {{ form.password1 }}
 
-        <p class="auth-footer">
-            Already have an account?
-            <a href="{% url 'accounts:login' %}">
-                Log in
-            </a>
-        </p>
+                    {% for error in form.password1.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="{{ form.password2.id_for_label }}">
+                        Confirm password
+                    </label>
+
+                    {{ form.password2 }}
+
+                    {% for error in form.password2.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary auth-submit"
+                >
+                    {% if invitation %}
+                        Create account & join team
+                    {% else %}
+                        Create account
+                    {% endif %}
+                </button>
+
+            </form>
+
+            <p class="auth-footer">
+
+                Already have an account?
+
+                <a href="{% url 'accounts:login' %}">
+                    Log in
+                </a>
+
+            </p>
+
+        {% endif %}
 
     </div>
 

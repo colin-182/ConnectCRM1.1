@@ -1,85 +1,55 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.utils.text import slugify
+
+from crm.models import Invitation, Membership
 
 from .forms import RegistrationForm
-from crm.models import Business, Invitation, Membership
-
-
-def _generate_business_slug(username):
-    """Generate a unique workspace slug from a username."""
-
-    base_slug = slugify(username) or "business"
-    slug = base_slug
-    counter = 2
-
-    while Business.objects.filter(slug=slug).exists():
-        slug = f"{base_slug}-{counter}"
-        counter += 1
-
-    return slug
 
 
 def register_view(request):
-    """Create a new business or accept an invitation during registration."""
+    """Create a new user account, optionally through an invitation."""
 
     if request.user.is_authenticated:
         return redirect("core:dashboard")
 
-    invitation_token = request.POST.get(
-        "invitation"
-    ) or request.GET.get(
-        "invitation"
-    )
+    invitation_token = request.GET.get("invitation")
+
+    if request.method == "POST":
+        invitation_token = request.POST.get("invitation")
 
     invitation = None
-    invitation_error = None
 
     if invitation_token:
-        invitation = Invitation.objects.filter(
-            token=invitation_token,
-        ).select_related("business").first()
+        invitation = (
+            Invitation.objects.filter(
+                token=invitation_token,
+            )
+            .select_related("business")
+            .first()
+        )
 
-        if invitation is None:
-            invitation_error = (
-                "This invitation is invalid or no longer available."
+        if (
+            invitation is None
+            or invitation.is_accepted
+            or invitation.is_expired
+        ):
+            return render(
+                request,
+                "accounts/register.html",
+                {
+                    "form": RegistrationForm(),
+                    "invalid_invitation": True,
+                },
             )
-        elif invitation.is_accepted:
-            invitation_error = (
-                "This invitation has already been accepted."
-            )
-            invitation = None
-        elif invitation.is_expired:
-            invitation_error = (
-                "This invitation has expired."
-            )
-            invitation = None
 
     if request.method == "POST":
         form = RegistrationForm(request.POST)
 
-        if invitation_error:
-            form.add_error(
-                None,
-                invitation_error,
-            )
-
         if invitation is not None:
-            submitted_email = request.POST.get(
-                "email",
-                "",
-            ).strip().lower()
-
-            if submitted_email != invitation.email.lower():
-                form.add_error(
-                    "email",
-                    (
-                        "Please use the email address that received "
-                        "this invitation."
-                    ),
-                )
+            form.fields["email"].initial = invitation.email
 
         if form.is_valid():
             try:
@@ -97,13 +67,11 @@ def register_view(request):
                         invitation.save(
                             update_fields=["accepted_at"]
                         )
-
                     else:
+                        from crm.models import Business
+
                         business = Business.objects.create(
-                            name=f"{user.username}'s Business",
-                            slug=_generate_business_slug(
-                                user.username
-                            ),
+                            name=f"{user.username}'s Business"
                         )
 
                         Membership.objects.create(
@@ -114,15 +82,21 @@ def register_view(request):
 
             except IntegrityError:
                 form.add_error(
-                    "username",
-                    "That username is already taken. Please choose another.",
+                    None,
+                    "Unable to create your account. Please try again.",
                 )
             else:
                 login(request, user)
                 return redirect("core:dashboard")
-
     else:
-        form = RegistrationForm()
+        if invitation is not None:
+            form = RegistrationForm(
+                initial={
+                    "email": invitation.email,
+                }
+            )
+        else:
+            form = RegistrationForm()
 
     return render(
         request,
@@ -130,7 +104,6 @@ def register_view(request):
         {
             "form": form,
             "invitation": invitation,
-            "invitation_token": invitation_token,
         },
     )
 
