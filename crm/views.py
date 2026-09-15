@@ -3,6 +3,7 @@ import secrets
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from .forms import CompanyForm, ContactForm, DealForm, InvitationForm, TaskForm
@@ -702,7 +703,7 @@ def invitation_create(request):
 
 
 def invitation_accept(request, token):
-    """Validate an invitation token and display the acceptance page."""
+    """Validate an invitation and display the acceptance page."""
 
     invitation = Invitation.objects.filter(
         token=token,
@@ -732,5 +733,9 @@ def invitation_accept(request, token):
         "crm/invitation_accept.html",
         {
             "invitation": invitation,
+            "registration_url": (
+                f"{reverse('accounts:register')}"
+                f"?invite={invitation.token}"
+            ),
         },
     )
