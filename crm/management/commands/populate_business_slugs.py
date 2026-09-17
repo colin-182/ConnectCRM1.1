@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 from crm.models import Business
+from crm.tenancy import generate_unique_slug
 
 
 class Command(BaseCommand):
@@ -13,20 +13,7 @@ class Command(BaseCommand):
         businesses = Business.objects.all().order_by("id")
 
         for business in businesses:
-            base_slug = slugify(business.name) or f"business-{business.id}"
-            slug = base_slug
-            counter = 2
-
-            while (
-                Business.objects
-                .exclude(pk=business.pk)
-                .filter(slug=slug)
-                .exists()
-            ):
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-
-            business.slug = slug
+            business.slug = generate_unique_slug(business.name, exclude_pk=business.pk)
             business.save(update_fields=["slug"])
 
             self.stdout.write(

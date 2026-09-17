@@ -239,6 +239,15 @@ class Deal(models.Model):
         related_name="deals",
     )
 
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="deals",
+        help_text="The team member this deal belongs to.",
+    )
+
     company = models.ForeignKey(
         Company,
         on_delete=models.SET_NULL,
@@ -284,6 +293,14 @@ class Deal(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def owner_display(self):
+        """A safe, always-renderable label for who owns this deal."""
+
+        if self.owner_id is None:
+            return "Unassigned"
+        return self.owner.get_full_name() or self.owner.username
 
 
 class Task(models.Model):

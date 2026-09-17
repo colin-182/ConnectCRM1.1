@@ -10,22 +10,66 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+try:
+    from dotenv import load_dotenv
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@9^nwt3-w!4thhg$9n&a2601$1y+x+mj6^xkwam(%2n5&alm9%'
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:
+    pass
+
+
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    'django-insecure-@9^nwt3-w!4thhg$9n&a2601$1y+x+mj6^xkwam(%2n5&alm9%',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+# The root domain each business workspace is hosted under, e.g. a business
+# with slug "acme" is reachable at acme.<BASE_DOMAIN>. This is a placeholder
+# for local development; set the CONNECTCRM_BASE_DOMAIN environment variable
+# to your real domain (e.g. connectcrm.com) when you deploy. See
+# SUBDOMAINS.md for local testing and deployment instructions.
+BASE_DOMAIN = os.environ.get("CONNECTCRM_BASE_DOMAIN", "connectcrm.local")
+
+# Subdomains that can never be claimed as a business workspace, because
+# they're used for the marketing site, admin, or infrastructure.
+RESERVED_SUBDOMAINS = {
+    "www", "app", "api", "admin", "static", "media", "mail", "ftp",
+    "blog", "help", "support", "status", "dev", "test", "staging",
+}
+
+ALLOWED_HOSTS = [
+    BASE_DOMAIN,
+    f".{BASE_DOMAIN}",  # matches any subdomain, e.g. acme.connectcrm.local
+    "localhost",
+    "127.0.0.1",
+]
+
+# Extra hosts (comma separated) can be supplied for real deployments,
+# e.g. CONNECTCRM_EXTRA_HOSTS="connectcrm.com,.connectcrm.com"
+_extra_hosts = os.environ.get("CONNECTCRM_EXTRA_HOSTS", "")
+if _extra_hosts:
+    ALLOWED_HOSTS.extend(host.strip() for host in _extra_hosts.split(",") if host.strip())
+
+# CSRF needs to trust the root domain and every business subdomain, since
+# each workspace posts forms back to its own https://<slug>.<domain> host.
+# The wildcard "*.example.com" form is supported by Django for this.
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{BASE_DOMAIN}",
+    f"https://*.{BASE_DOMAIN}",
+]
+_extra_csrf_origins = os.environ.get("CONNECTCRM_EXTRA_CSRF_ORIGINS", "")
+if _extra_csrf_origins:
+    CSRF_TRUSTED_ORIGINS.extend(origin.strip() for origin in _extra_csrf_origins.split(",") if origin.strip())
 
 
 # Application definition
@@ -44,12 +88,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'crm.middleware.TenantMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -64,6 +110,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.crm_header',
             ],
         },
     },
@@ -72,15 +119,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+_database_url = os.environ.get("DATABASE_URL")
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if _database_url:
+    import dj_database_url
+
+    DATABASES = {
+        "default": dj_database_url.parse(_database_url, conn_max_age=600, ssl_require=True)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -117,19 +170,39 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
     },
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@connectcrm.local'
+
 LOGIN_URL = "accounts:login"
+
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = os.environ.get("CONNECTCRM_SSL_REDIRECT", "True") == "True"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week; raise once you're confident HTTPS is solid everywhere
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = False

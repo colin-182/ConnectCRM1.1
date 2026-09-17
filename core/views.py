@@ -1,9 +1,12 @@
+from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from crm.models import Company, Contact, Deal, Membership, Task
+from crm.tenancy import build_workspace_url, get_business_and_membership, scope_deals_for_membership
 
 
 def home(request):
@@ -11,18 +14,32 @@ def home(request):
 
 
 @login_required
+def help_view(request):
+    """Display basic in-app guidance for ConnectCRM users."""
+
+    membership, _tenant_locked = get_business_and_membership(request)
+    return render(request, "core/help.html", {"membership": membership})
+
+
+@login_required
 def dashboard(request):
     """Display live CRM statistics and activity for the user's business."""
 
-    membership = Membership.objects.filter(
-        user=request.user
-    ).select_related("business").first()
+    membership, tenant_locked = get_business_and_membership(request)
 
     if membership is None:
+        if tenant_locked:
+            messages.error(
+                request,
+                "Your account doesn't have access to this workspace. "
+                "Log in with the account your admin invited.",
+            )
+            return redirect("accounts:login")
         return render(
             request,
             "core/dashboard.html",
             {
+                "business": None,
                 "contact_count": 0,
                 "active_deal_count": 0,
                 "pipeline_value": 0,
@@ -35,17 +52,15 @@ def dashboard(request):
         )
 
     business = membership.business
+    is_admin = membership.role == Membership.ADMIN
 
-    # ------------------------------------------------------------------
-    # KPI statistics
-    # ------------------------------------------------------------------
+    visible_deals = scope_deals_for_membership(Deal.objects.filter(business=business), membership)
 
     contact_count = Contact.objects.filter(
         business=business
     ).count()
 
-    active_deals = Deal.objects.filter(
-        business=business,
+    active_deals = visible_deals.filter(
         stage__in=[
             Deal.LEAD,
             Deal.QUALIFIED,
@@ -67,10 +82,6 @@ def dashboard(request):
 
     open_task_count = open_tasks.count()
 
-    # ------------------------------------------------------------------
-    # Upcoming tasks
-    # ------------------------------------------------------------------
-
     upcoming_tasks = open_tasks.filter(
         due_date__isnull=False,
         due_date__gte=timezone.localdate(),
@@ -83,10 +94,6 @@ def dashboard(request):
         "due_time",
     )[:4]
 
-    # ------------------------------------------------------------------
-    # Sales pipeline
-    # ------------------------------------------------------------------
-
     pipeline = []
 
     stages = [
@@ -98,8 +105,7 @@ def dashboard(request):
     ]
 
     for label, stage in stages:
-        stage_deals = Deal.objects.filter(
-            business=business,
+        stage_deals = visible_deals.filter(
             stage=stage,
         )
 
@@ -115,9 +121,38 @@ def dashboard(request):
             }
         )
 
-    # ------------------------------------------------------------------
-    # Recent activity
-    # ------------------------------------------------------------------
+    # Admins get a per-team-member breakdown of the pipeline so they can
+    # drill into any one salesperson's deals (their "granular view").
+    team_pipeline = []
+    if is_admin:
+        User = get_user_model()
+        team_members = User.objects.filter(memberships__business=business).distinct().order_by("username")
+        for member in team_members:
+            member_deals = Deal.objects.filter(business=business, owner=member)
+            active_member_deals = member_deals.filter(
+                stage__in=[Deal.LEAD, Deal.QUALIFIED, Deal.PROPOSAL, Deal.NEGOTIATION]
+            )
+            team_pipeline.append(
+                {
+                    "user_id": member.id,
+                    "name": member.get_full_name() or member.username,
+                    "deal_count": active_member_deals.count(),
+                    "pipeline_value": active_member_deals.aggregate(total=Sum("value"))["total"] or 0,
+                }
+            )
+        unassigned_deals = Deal.objects.filter(business=business, owner__isnull=True)
+        active_unassigned = unassigned_deals.filter(
+            stage__in=[Deal.LEAD, Deal.QUALIFIED, Deal.PROPOSAL, Deal.NEGOTIATION]
+        )
+        if active_unassigned.exists():
+            team_pipeline.append(
+                {
+                    "user_id": None,
+                    "name": "Unassigned",
+                    "deal_count": active_unassigned.count(),
+                    "pipeline_value": active_unassigned.aggregate(total=Sum("value"))["total"] or 0,
+                }
+            )
 
     recent_activity = []
 
@@ -131,9 +166,7 @@ def dashboard(request):
                 "type": "company",
                 "icon": "🏢",
                 "title": "New company added",
-                "description": (
-                    f"{company.name} was added to your companies."
-                ),
+                "description": f"{company.name} was added to your companies.",
                 "timestamp": company.created_at,
             }
         )
@@ -156,9 +189,7 @@ def dashboard(request):
             }
         )
 
-    deals = Deal.objects.filter(
-        business=business
-    ).order_by("-updated_at")[:4]
+    deals = visible_deals.order_by("-updated_at")[:4]
 
     for deal in deals:
         recent_activity.append(
@@ -184,9 +215,7 @@ def dashboard(request):
                 "type": "task",
                 "icon": "✔️",
                 "title": "Task created",
-                "description": (
-                    f"{task.title} was added to your tasks."
-                ),
+                "description": f"{task.title} was added to your tasks.",
                 "timestamp": task.created_at,
             }
         )
@@ -202,11 +231,15 @@ def dashboard(request):
         request,
         "core/dashboard.html",
         {
+            "business": business,
+            "workspace_url": build_workspace_url(request, business),
             "contact_count": contact_count,
             "active_deal_count": active_deal_count,
             "pipeline_value": pipeline_value,
             "open_task_count": open_task_count,
             "pipeline": pipeline,
+            "is_admin": is_admin,
+            "team_pipeline": team_pipeline,
             "upcoming_tasks": upcoming_tasks,
             "recent_activity": recent_activity,
             "today": timezone.localdate(),
