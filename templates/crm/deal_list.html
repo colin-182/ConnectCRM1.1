@@ -1,127 +1,50 @@
 {% extends "base.html" %}
-
+{% block title %}Deals | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Deals</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-
-    <div>
-        <h1>Deals</h1>
-        <p>Manage your sales opportunities and pipeline.</p>
-    </div>
-
-    <div class="page-actions">
-        <a href="{% url 'crm:deal_create' %}" class="btn btn-primary">
-            Add Deal
-        </a>
-    </div>
-
+    <div><p class="page-eyebrow">CRM / PIPELINE</p><h1>Deals</h1><p>Track opportunities from first conversation to closed business.</p></div>
+    <div class="page-actions"><a href="{% url 'crm:deal_create' %}" class="btn btn-primary">＋ Add deal</a></div>
 </div>
-
-<div class="content-card">
-
-    <div class="card-header">
-        <div>
-            <h2>All Deals</h2>
-            <p>Sales opportunities currently in your CRM.</p>
-        </div>
-    </div>
-
-    {% if deals %}
-
-        <div class="table-responsive">
-
-            <table class="data-table">
-
-                <thead>
-                    <tr>
-                        <th>Deal</th>
-                        <th>Company</th>
-                        <th>Contact</th>
-                        <th>Value</th>
-                        <th>Stage</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {% for deal in deals %}
-
-                        <tr>
-
-                            <td>
-                                <a
-                                    href="{% url 'crm:deal_detail' deal.id %}"
-                                    class="table-link"
-                                >
-                                    {{ deal.title }}
-                                </a>
-                            </td>
-
-                            <td>
-                                {% if deal.company %}
-                                    <a href="{% url 'crm:company_detail' deal.company.id %}">
-                                        {{ deal.company.name }}
-                                    </a>
-                                {% else %}
-                                    Not assigned
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if deal.contact %}
-                                    <a href="{% url 'crm:contact_detail' deal.contact.id %}">
-                                        {{ deal.contact.first_name }}
-                                        {{ deal.contact.last_name }}
-                                    </a>
-                                {% else %}
-                                    Not assigned
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                €{{ deal.value|floatformat:2 }}
-                            </td>
-
-                            <td>
-                                {{ deal.get_stage_display }}
-                            </td>
-
-                            <td>
-                                {{ deal.created_at|date:"d M Y" }}
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    {% else %}
-
-        <div class="empty-state">
-
-            <h3>No deals yet</h3>
-
-            <p>
-                Create your first deal to start tracking your sales pipeline.
-            </p>
-
-            <a
-                href="{% url 'crm:deal_create' %}"
-                class="btn btn-primary"
-            >
-                Add Your First Deal
-            </a>
-
-        </div>
-
+<div class="pipeline-summary">
+    <div class="summary-card"><span>Total pipeline</span><strong>€{{ pipeline_total|floatformat:2 }}</strong></div>
+    <div class="summary-card"><span>Open opportunities</span><strong>{{ deal_count }}</strong></div>
+    <div class="summary-card"><span>Won value</span><strong>€{{ stage_totals.won|floatformat:2 }}</strong></div>
+    <div class="summary-card"><span>Negotiation</span><strong>€{{ stage_totals.negotiation|floatformat:2 }}</strong></div>
+</div>
+<form method="get" class="filter-bar">
+    <div class="filter-search"><span>⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search deals, companies or contacts..."></div>
+    <select class="filter-select" name="stage" aria-label="Filter by stage">
+        <option value="">All stages</option>
+        {% for value,label in stage_choices %}<option value="{{ value }}"{% if stage == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% if is_admin and team_members %}
+    <select class="filter-select" name="owner" aria-label="Filter by team member">
+        <option value="">Everyone on the team</option>
+        <option value="unassigned"{% if owner_param == "unassigned" %} selected{% endif %}>Unassigned</option>
+        {% for member in team_members %}<option value="{{ member.id }}"{% if owner_param == member.id|stringformat:"s" %} selected{% endif %}>{{ member.get_full_name|default:member.username }}</option>{% endfor %}
+    </select>
     {% endif %}
-
+    {% if query or stage or owner_param %}<a href="{% url 'crm:deal_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+    <span class="filter-count">{{ deal_count }} deal{{ deal_count|pluralize }}</span>
+</form>
+<div class="content-card">
+    {% if deals %}
+        <div class="crm-list-head deal-grid"><span>Opportunity</span><span>Company</span><span>Contact</span><span>Value</span><span>Stage</span><span></span></div>
+        <div class="crm-list">
+        {% for deal in deals %}
+            <a href="{% url 'crm:deal_detail' deal.id %}" class="crm-row deal-grid">
+                <div class="row-primary"><span class="avatar-square">◇</span><span><strong class="row-title">{{ deal.title }}</strong><small class="row-subtitle">Updated {{ deal.updated_at|date:"d M Y" }}{% if is_admin %} · {{ deal.owner_display }}{% endif %}</small></span></div>
+                <span class="row-meta">{{ deal.company.name|default:"—" }}</span>
+                <span class="row-meta">{% if deal.contact %}{{ deal.contact.first_name }} {{ deal.contact.last_name }}{% else %}—{% endif %}</span>
+                <span class="row-value">€{{ deal.value|floatformat:2 }}</span>
+                <span><span class="badge {% if deal.stage == 'won' %}badge-green{% elif deal.stage == 'lost' %}badge-red{% elif deal.stage == 'negotiation' %}badge-amber{% else %}badge-blue{% endif %}">{{ deal.get_stage_display }}</span></span>
+                <span class="row-action">›</span>
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state"><div class="avatar-square" style="margin:0 auto 12px">◇</div><h3>{% if query or stage or owner_param %}No deals match your filters{% else %}No deals yet{% endif %}</h3><p>{% if query or stage or owner_param %}Clear the filters or try a different search.{% else %}Create your first opportunity and start tracking your pipeline.{% endif %}</p>{% if not query and not stage and not owner_param %}<a href="{% url 'crm:deal_create' %}" class="btn btn-primary">Add your first deal</a>{% endif %}</div>
+    {% endif %}
 </div>
-
 {% endblock %}

@@ -13,6 +13,11 @@ __pycache__/
 
 # Django
 *.log
+db.sqlite3
+
+# collectstatic output - generated at deploy time, never hand-edited
+/staticfiles/*
+!/staticfiles/.gitkeep
 
 # IDE
 .vscode/

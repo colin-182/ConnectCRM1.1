@@ -47,20 +47,18 @@
 
         {% if invalid_invitation %}
 
-            <div class="form-error">
+            <div class="auth-error">
                 This invitation is invalid, has expired, or has already
                 been accepted.
             </div>
 
             <div class="form-actions">
-
                 <a
                     href="{% url 'core:home' %}"
                     class="btn btn-primary"
                 >
                     Return to ConnectCRM
                 </a>
-
             </div>
 
         {% else %}
@@ -80,59 +78,48 @@
                 {{ form.non_field_errors }}
 
                 <div class="form-group">
-
                     <label for="{{ form.username.id_for_label }}">
                         Username
                     </label>
-
                     {{ form.username }}
-
                     {% for error in form.username.errors %}
                         <p class="form-error">{{ error }}</p>
                     {% endfor %}
-
                 </div>
 
                 <div class="form-group">
-
                     <label for="{{ form.email.id_for_label }}">
                         Email address
                     </label>
-
                     {{ form.email }}
-
                     {% for error in form.email.errors %}
                         <p class="form-error">{{ error }}</p>
                     {% endfor %}
-
+                    {% if invitation %}
+                        <p class="form-help">
+                            This email address is tied to your invitation.
+                        </p>
+                    {% endif %}
                 </div>
 
                 <div class="form-group">
-
                     <label for="{{ form.password1.id_for_label }}">
                         Password
                     </label>
-
                     {{ form.password1 }}
-
                     {% for error in form.password1.errors %}
                         <p class="form-error">{{ error }}</p>
                     {% endfor %}
-
                 </div>
 
                 <div class="form-group">
-
                     <label for="{{ form.password2.id_for_label }}">
                         Confirm password
                     </label>
-
                     {{ form.password2 }}
-
                     {% for error in form.password2.errors %}
                         <p class="form-error">{{ error }}</p>
                     {% endfor %}
-
                 </div>
 
                 <button
@@ -149,13 +136,12 @@
             </form>
 
             <p class="auth-footer">
-
                 Already have an account?
-
-                <a href="{% url 'accounts:login' %}">
+                <a
+                    href="{% url 'accounts:login' %}{% if invitation %}?next={% url 'crm:invitation_accept' invitation.token %}{% endif %}"
+                >
                     Log in
                 </a>
-
             </p>
 
         {% endif %}

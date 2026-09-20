@@ -1,50 +1,32 @@
 {% extends "base.html" %}
-
+{% block title %}Companies | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Companies</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-    <div>
-        <h1>Companies</h1>
-        <p>Manage your company's customers and organisations.</p>
-    </div>
-
-<a href="{% url 'crm:company_create' %}" class="btn btn-primary">
-    Add Company
-</a></div>
-
-<div class="content-card">
-
-    {% if companies %}
-        <div class="company-list">
-            {% for company in companies %}
-                <div class="company-row">
-                    <div>
-<h3>
-    <a href="{% url 'crm:company_detail' company.id %}">
-        {{ company.name }}
-    </a>
-</h3>
-                        {% if company.industry %}
-                            <p>{{ company.industry }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        {% if company.email %}
-                            <span>{{ company.email }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-
-    {% else %}
-        <div class="empty-state">
-            <h2>No companies yet</h2>
-            <p>Start building your CRM by adding your first company.</p>
-        </div>
-    {% endif %}
-
+    <div><p class="page-eyebrow">CRM / COMPANIES</p><h1>Companies</h1><p>Build and manage the organisations in your customer base.</p></div>
+    <div class="page-actions"><a href="{% url 'crm:company_create' %}" class="btn btn-primary">＋ Add company</a></div>
 </div>
-
+<form method="get" class="filter-bar">
+    <div class="filter-search"><span>⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search companies, industry, email or phone..."></div>
+    {% if query %}<a href="{% url 'crm:company_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+    <span class="filter-count">{{ company_count }} result{{ company_count|pluralize }}</span>
+</form>
+<div class="content-card">
+    {% if companies %}
+        <div class="crm-list-head company-grid"><span>Company</span><span>Industry</span><span>Contact</span><span>Deals</span><span></span></div>
+        <div class="crm-list">
+        {% for company in companies %}
+            <a href="{% url 'crm:company_detail' company.id %}" class="crm-row company-grid">
+                <div class="row-primary"><span class="avatar-square">{{ company.name|slice:":1"|upper }}</span><span><strong class="row-title">{{ company.name }}</strong><small class="row-subtitle">{% if company.email %}{{ company.email }}{% elif company.phone %}{{ company.phone }}{% else %}No contact details{% endif %}</small></span></div>
+                <span class="row-meta">{{ company.industry|default:"—" }}</span>
+                <span class="row-meta">{{ company.contact_total }} contact{{ company.contact_total|pluralize }}</span>
+                <span class="row-meta">{{ company.deal_total }}</span>
+                <span class="row-action">›</span>
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state"><div class="avatar-square" style="margin:0 auto 12px">▦</div><h3>{% if query %}No companies found{% else %}No companies yet{% endif %}</h3><p>{% if query %}Try a different search term.{% else %}Add your first company to start building your customer database.{% endif %}</p>{% if not query %}<a href="{% url 'crm:company_create' %}" class="btn btn-primary">Add your first company</a>{% endif %}</div>
+    {% endif %}
+</div>
 {% endblock %}

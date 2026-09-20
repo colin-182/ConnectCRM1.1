@@ -1,67 +1,32 @@
 {% extends "base.html" %}
-
+{% block title %}Contacts | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Contacts</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-    <div>
-        <h1>Contacts</h1>
-        <p>Manage the people connected to your customers and organisations.</p>
-    </div>
-
-    <a href="{% url 'crm:contact_create' %}" class="btn btn-primary">
-        Add Contact
-    </a>
+    <div><p class="page-eyebrow">CRM / CONTACTS</p><h1>Contacts</h1><p>Keep the people behind every customer relationship organised.</p></div>
+    <div class="page-actions"><a href="{% url 'crm:contact_create' %}" class="btn btn-primary">＋ Add contact</a></div>
 </div>
-
+<form method="get" class="filter-bar">
+    <div class="filter-search"><span>⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search names, companies, roles or email..."></div>
+    {% if query %}<a href="{% url 'crm:contact_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+    <span class="filter-count">{{ contact_count }} result{{ contact_count|pluralize }}</span>
+</form>
 <div class="content-card">
-
     {% if contacts %}
-
-        <div class="company-list">
-
-            {% for contact in contacts %}
-
-                <div class="company-row">
-
-                    <div>
-                        <h3>
-                            <a href="{% url 'crm:contact_detail' contact.id %}">
-                                {{ contact.first_name }} {{ contact.last_name }}
-                            </a>
-                        </h3>
-
-                        {% if contact.job_title %}
-                            <p>{{ contact.job_title }}</p>
-                        {% endif %}
-
-                        {% if contact.company %}
-                            <p>{{ contact.company.name }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        {% if contact.email %}
-                            <span>{{ contact.email }}</span>
-                        {% endif %}
-                    </div>
-
-                </div>
-
-            {% endfor %}
-
+        <div class="crm-list-head contact-grid"><span>Contact</span><span>Company</span><span>Role</span><span>Email</span><span></span></div>
+        <div class="crm-list">
+        {% for contact in contacts %}
+            <a href="{% url 'crm:contact_detail' contact.id %}" class="crm-row contact-grid">
+                <div class="row-primary"><span class="avatar-round">{{ contact.first_name|slice:":1"|upper }}{{ contact.last_name|slice:":1"|upper }}</span><span><strong class="row-title">{{ contact.first_name }} {{ contact.last_name }}</strong><small class="row-subtitle">{{ contact.email|default:"No email address" }}</small></span></div>
+                <span class="row-meta">{{ contact.company.name|default:"—" }}</span>
+                <span class="row-meta">{{ contact.job_title|default:"—" }}</span>
+                <span class="row-meta">{{ contact.phone|default:"—" }}</span>
+                <span class="row-action">›</span>
+            </a>
+        {% endfor %}
         </div>
-
     {% else %}
-
-        <div class="empty-state">
-            <h2>No contacts yet</h2>
-            <p>
-                Start building your CRM by adding your first contact.
-            </p>
-        </div>
-
+        <div class="empty-state"><div class="avatar-round" style="margin:0 auto 12px">◉</div><h3>{% if query %}No contacts found{% else %}No contacts yet{% endif %}</h3><p>{% if query %}Try another name, company or email.{% else %}Add your first contact to start building relationship history.{% endif %}</p>{% if not query %}<a href="{% url 'crm:contact_create' %}" class="btn btn-primary">Add your first contact</a>{% endif %}</div>
     {% endif %}
-
 </div>
-
 {% endblock %}

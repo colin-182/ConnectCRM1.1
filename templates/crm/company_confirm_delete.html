@@ -1,55 +1,7 @@
 {% extends "base.html" %}
-
+{% block title %}Delete {{ company.name }} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Delete Company</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-    <div>
-        <h1>Delete Company</h1>
-        <p>Confirm that you want to remove this company.</p>
-    </div>
-</div>
-
-<div class="content-card">
-
-    <div class="delete-confirmation">
-
-        <div class="delete-warning">
-            <h2>Delete {{ company.name }}?</h2>
-
-            <p>
-                This action will permanently remove this company
-                from your CRM.
-            </p>
-
-            <p>
-                This cannot be undone.
-            </p>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'crm:company_detail' company.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-danger"
-                >
-                    Delete Company
-                </button>
-
-            </div>
-        </form>
-
-    </div>
-
-</div>
-
+<div class="page-header"><div><p class="page-eyebrow">COMPANY</p><h1>Delete company</h1><p>This action permanently removes the customer record.</p></div></div>
+<div class="content-card delete-confirmation"><div class="delete-warning"><div class="detail-identity" style="margin-bottom:20px"><div class="detail-avatar">{{ company.name|slice:":1"|upper }}</div><div><h2>{{ company.name }}</h2><p>{{ company.industry|default:"Company" }}</p></div></div><p>Are you sure you want to delete <strong>{{ company.name }}</strong>?</p><p>Contacts, deals and tasks linked to it will remain in your CRM but their company relationship may be cleared.</p></div><form method="post"><div class="form-actions"><a href="{% url 'crm:company_detail' company.id %}" class="btn btn-secondary">Cancel</a>{% csrf_token %}<button type="submit" class="btn btn-danger">Delete company</button></div></form></div>
 {% endblock %}

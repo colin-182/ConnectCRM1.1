@@ -1,60 +1,7 @@
 {% extends "base.html" %}
-
+{% block title %}Delete {{ task.title }} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Delete Task</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-
-    <div>
-        <h1>Delete Task</h1>
-        <p>Confirm that you want to remove this task.</p>
-    </div>
-
-</div>
-
-<div class="content-card">
-
-    <div class="delete-confirmation">
-
-        <div class="delete-warning">
-
-            <h2>Delete {{ task.title }}?</h2>
-
-            <p>
-                This action will permanently remove this task from your CRM.
-            </p>
-
-            <p>
-                This cannot be undone.
-            </p>
-
-        </div>
-
-        <form method="post">
-
-            {% csrf_token %}
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'crm:task_detail' task.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-danger"
-                >
-                    Delete Task
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
+<div class="page-header"><div><p class="page-eyebrow">FOLLOW-UP TASK</p><h1>Delete task</h1><p>Remove this action from your CRM.</p></div></div>
+<div class="content-card delete-confirmation"><div class="delete-warning"><div class="detail-identity" style="margin-bottom:20px"><div class="detail-avatar">✓</div><div><h2>{{ task.title }}</h2><p>{% if task.completed %}Completed{% else %}Open{% endif %}{% if task.due_date %} · Due {{ task.due_date|date:"d M Y" }}{% endif %}</p></div></div><p>Are you sure you want to delete <strong>{{ task.title }}</strong>?</p><p>This cannot be undone.</p></div><form method="post"><div class="form-actions"><a href="{% url 'crm:task_detail' task.id %}" class="btn btn-secondary">Cancel</a>{% csrf_token %}<button type="submit" class="btn btn-danger">Delete task</button></div></form></div>
 {% endblock %}

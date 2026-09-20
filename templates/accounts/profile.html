@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}My Account | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>My Account</h1>{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-eyebrow">ACCOUNT</p>
+        <h1>My account</h1>
+        <p>Manage your ConnectCRM account details and workspace access.</p>
+    </div>
+</div>
+<div class="profile-grid">
+    <section class="content-card profile-card">
+        <div class="profile-hero">
+            <div class="profile-avatar">{{ request.user.username|slice:":2"|upper }}</div>
+            <div><h2>{{ request.user.username }}</h2><p>{{ request.user.email }}</p></div>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-box"><span>Username</span><strong>{{ request.user.username }}</strong></div>
+            <div class="detail-box"><span>Email</span><strong>{{ request.user.email }}</strong></div>
+            <div class="detail-box"><span>Business</span><strong>{{ membership.business.name|default:"No business" }}</strong></div>
+            <div class="detail-box"><span>Role</span><strong>{{ membership.get_role_display|default:"—" }}</strong></div>
+            {% if workspace_url %}
+                <div class="detail-box"><span>Workspace URL</span><strong><a href="{{ workspace_url }}">{{ workspace_url }}</a></strong></div>
+            {% endif %}
+        </div>
+    </section>
+    <section class="content-card">
+        <p class="page-eyebrow">SECURITY</p>
+        <h2>Account security</h2>
+        <p class="card-copy">If you need to change your password, use the password reset flow.</p>
+        <a href="{% url 'accounts:password_reset' %}" class="btn btn-secondary">Reset password</a>
+    </section>
+</div>
+{% endblock %}

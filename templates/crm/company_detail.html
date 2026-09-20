@@ -1,235 +1,25 @@
 {% extends "base.html" %}
-
+{% block title %}{{ company.name }} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Company</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-
-    <div>
-        <h1>{{ company.name }}</h1>
-        <p>Company details and information.</p>
-    </div>
-
-    <div class="page-actions">
-
-        <a
-            href="{% url 'crm:company_edit' company.id %}"
-            class="btn btn-primary"
-        >
-            Edit Company
-        </a>
-
-        <a
-            href="{% url 'crm:company_delete' company.id %}"
-            class="btn btn-danger"
-        >
-            Delete Company
-        </a>
-
-        <a
-            href="{% url 'crm:company_list' %}"
-            class="btn btn-secondary"
-        >
-            Back to Companies
-        </a>
-
-    </div>
-
+<div class="detail-hero">
+    <div class="detail-identity"><div class="detail-avatar">{{ company.name|slice:":1"|upper }}</div><div><p class="page-eyebrow">COMPANY</p><h1>{{ company.name }}</h1><p>{{ company.industry|default:"Customer organisation" }}</p></div></div>
+    <div class="detail-actions"><a href="{% url 'crm:company_edit' company.id %}" class="btn btn-primary">Edit company</a><a href="{% url 'crm:company_delete' company.id %}" class="btn btn-danger">Delete</a><a href="{% url 'crm:company_list' %}" class="btn btn-secondary">Back</a></div>
 </div>
-
-
-<!-- Company Details -->
-
 <div class="content-card">
-
-    <div class="company-detail">
-
-        <div class="detail-item">
-            <span class="detail-label">Company Name</span>
-
-            <span class="detail-value">
-                {{ company.name }}
-            </span>
-        </div>
-
-
-        <div class="detail-item">
-            <span class="detail-label">Industry</span>
-
-            <span class="detail-value">
-                {{ company.industry|default:"Not provided" }}
-            </span>
-        </div>
-
-
-        <div class="detail-item">
-            <span class="detail-label">Phone</span>
-
-            <span class="detail-value">
-
-                {% if company.phone %}
-
-                    <a href="tel:{{ company.phone }}">
-                        {{ company.phone }}
-                    </a>
-
-                {% else %}
-
-                    Not provided
-
-                {% endif %}
-
-            </span>
-        </div>
-
-
-        <div class="detail-item">
-            <span class="detail-label">Email</span>
-
-            <span class="detail-value">
-
-                {% if company.email %}
-
-                    <a href="mailto:{{ company.email }}">
-                        {{ company.email }}
-                    </a>
-
-                {% else %}
-
-                    Not provided
-
-                {% endif %}
-
-            </span>
-        </div>
-
-
-        <div class="detail-item">
-            <span class="detail-label">Website</span>
-
-            <span class="detail-value">
-
-                {% if company.website %}
-
-                    <a
-                        href="{{ company.website }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        {{ company.website }}
-                    </a>
-
-                {% else %}
-
-                    Not provided
-
-                {% endif %}
-
-            </span>
-        </div>
-
-
-        <div class="detail-item">
-            <span class="detail-label">Created</span>
-
-            <span class="detail-value">
-                {{ company.created_at|date:"d M Y" }}
-            </span>
-        </div>
-
+    <div class="card-header"><div><h2>Company information</h2><p>Core account details and communication channels.</p></div></div>
+    <div class="detail-grid">
+        <div class="detail-box"><span>Company name</span><strong>{{ company.name }}</strong></div>
+        <div class="detail-box"><span>Industry</span><strong>{{ company.industry|default:"Not provided" }}</strong></div>
+        <div class="detail-box"><span>Email</span><strong>{% if company.email %}<a href="mailto:{{ company.email }}">{{ company.email }}</a>{% else %}Not provided{% endif %}</strong></div>
+        <div class="detail-box"><span>Phone</span><strong>{% if company.phone %}<a href="tel:{{ company.phone }}">{{ company.phone }}</a>{% else %}Not provided{% endif %}</strong></div>
+        <div class="detail-box"><span>Website</span><strong>{% if company.website %}<a href="{{ company.website }}" target="_blank" rel="noopener">{{ company.website }}</a>{% else %}Not provided{% endif %}</strong></div>
+        <div class="detail-box"><span>Added</span><strong>{{ company.created_at|date:"d M Y" }}</strong></div>
     </div>
-
 </div>
-
-
-<!-- Company Contacts -->
-
-<div class="content-card">
-
-    <div class="section-header">
-
-        <div>
-            <h2>Contacts</h2>
-
-            <p>
-                People associated with {{ company.name }}.
-            </p>
-        </div>
-
-        <a
-            href="{% url 'crm:contact_create' %}"
-            class="btn btn-primary"
-        >
-            Add Contact
-        </a>
-
-    </div>
-
-
-    {% if contacts %}
-
-        <div class="company-list">
-
-            {% for contact in contacts %}
-
-                <div class="company-row">
-
-                    <div>
-
-                        <h3>
-                            <a
-                                href="{% url 'crm:contact_detail' contact.id %}"
-                            >
-                                {{ contact.first_name }}
-                                {{ contact.last_name }}
-                            </a>
-                        </h3>
-
-
-                        {% if contact.job_title %}
-
-                            <p>
-                                {{ contact.job_title }}
-                            </p>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <div>
-
-                        {% if contact.email %}
-
-                            <span>
-                                {{ contact.email }}
-                            </span>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-
-    {% else %}
-
-        <div class="empty-state">
-
-            <h2>No contacts yet</h2>
-
-            <p>
-                Add a contact to associate them with this company.
-            </p>
-
-        </div>
-
-    {% endif %}
-
+<div class="related-grid">
+    <section class="content-card"><div class="section-header"><div><h3>Contacts</h3><p>People connected to this company.</p></div><a href="{% url 'crm:contact_create' %}" class="btn btn-secondary">＋ Add</a></div>{% for contact in contacts %}<a class="related-item" href="{% url 'crm:contact_detail' contact.id %}"><span><strong class="row-title">{{ contact.first_name }} {{ contact.last_name }}</strong><small class="row-subtitle">{{ contact.job_title|default:"Contact" }}</small></span><span>›</span></a>{% empty %}<div class="empty-state"><h3>No contacts yet</h3><p>Add a person and link them to this company.</p></div>{% endfor %}</section>
+    <section class="content-card"><div class="section-header"><div><h3>Deals</h3><p>Opportunities associated with this account.</p></div><a href="{% url 'crm:deal_create' %}" class="btn btn-secondary">＋ Add</a></div>{% for deal in deals %}<a class="related-item" href="{% url 'crm:deal_detail' deal.id %}"><span><strong class="row-title">{{ deal.title }}</strong><small class="row-subtitle">{{ deal.get_stage_display }}</small></span><strong>€{{ deal.value|floatformat:2 }}</strong></a>{% empty %}<div class="empty-state"><h3>No deals yet</h3><p>Create an opportunity for this account.</p></div>{% endfor %}</section>
 </div>
-
-
+<div class="content-card"><div class="section-header"><div><h3>Recent tasks</h3><p>Follow-up actions linked to {{ company.name }}.</p></div><a href="{% url 'crm:task_create' %}" class="btn btn-secondary">＋ Add task</a></div>{% for task in tasks %}<a class="related-item" href="{% url 'crm:task_detail' task.id %}"><span><strong class="row-title">{{ task.title }}</strong><small class="row-subtitle">{% if task.due_date %}Due {{ task.due_date|date:"d M Y" }}{% else %}No due date{% endif %}</small></span><span class="badge {% if task.completed %}badge-green{% else %}badge-blue{% endif %}">{% if task.completed %}Completed{% else %}Open{% endif %}</span></a>{% empty %}<div class="empty-state"><h3>No tasks yet</h3><p>Keep the next action visible by adding a task.</p></div>{% endfor %}</div>
 {% endblock %}

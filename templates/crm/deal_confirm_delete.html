@@ -1,60 +1,7 @@
 {% extends "base.html" %}
-
+{% block title %}Delete {{ deal.title }} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Delete Deal</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-
-    <div>
-        <h1>Delete Deal</h1>
-        <p>Confirm that you want to remove this deal.</p>
-    </div>
-
-</div>
-
-<div class="content-card">
-
-    <div class="delete-confirmation">
-
-        <div class="delete-warning">
-
-            <h2>Delete {{ deal.title }}?</h2>
-
-            <p>
-                This action will permanently remove this deal from your CRM.
-            </p>
-
-            <p>
-                This cannot be undone.
-            </p>
-
-        </div>
-
-        <form method="post">
-
-            {% csrf_token %}
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'crm:deal_detail' deal.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-danger"
-                >
-                    Delete Deal
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
+<div class="page-header"><div><p class="page-eyebrow">OPPORTUNITY</p><h1>Delete deal</h1><p>Remove this opportunity from your sales pipeline.</p></div></div>
+<div class="content-card delete-confirmation"><div class="delete-warning"><div class="detail-identity" style="margin-bottom:20px"><div class="detail-avatar">◇</div><div><h2>{{ deal.title }}</h2><p>€{{ deal.value|floatformat:2 }} · {{ deal.get_stage_display }}</p></div></div><p>Are you sure you want to delete <strong>{{ deal.title }}</strong>?</p><p>This cannot be undone.</p></div><form method="post"><div class="form-actions"><a href="{% url 'crm:deal_detail' deal.id %}" class="btn btn-secondary">Cancel</a>{% csrf_token %}<button type="submit" class="btn btn-danger">Delete deal</button></div></form></div>
 {% endblock %}

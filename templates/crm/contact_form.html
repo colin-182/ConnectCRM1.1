@@ -1,76 +1,30 @@
 {% extends "base.html" %}
-
+{% block title %}{% if is_edit %}Edit Contact{% else %}Add Contact{% endif %} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>{% if is_edit %}Edit Contact{% else %}New Contact{% endif %}</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-    <div>
-        {% if is_edit %}
-            <h1>Edit Contact</h1>
-            <p>Update the information for {{ contact.first_name }} {{ contact.last_name }}.</p>
-        {% else %}
-            <h1>Add Contact</h1>
-            <p>Add a new contact to your CRM.</p>
-        {% endif %}
-    </div>
+    <div><p class="page-eyebrow">CRM / CONTACTS</p><h1>{% if is_edit %}Edit contact{% else %}Add a contact{% endif %}</h1><p>{% if is_edit %}Update {{ contact.first_name }} {{ contact.last_name }}'s relationship record.{% else %}Create a person record and link them to a company.{% endif %}</p></div>
 </div>
-
+<div class="form-shell">
 <div class="content-card">
-
-    <form method="post">
+    <div class="form-card-header"><h2>Contact information</h2><p>Keep personal, role and communication details in one place.</p></div>
+    <form method="post" class="crm-form">
         {% csrf_token %}
-
-        {% for field in form %}
+        <div class="form-grid-2">
+            {% for field in form %}
             <div class="form-group">
-
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
-
-                {% if field.errors %}
-                    <div class="form-error">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
-
+                {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
             </div>
-        {% endfor %}
-
-        <div class="form-actions">
-
-            {% if is_edit %}
-
-                <a
-                    href="{% url 'crm:contact_detail' contact.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button type="submit" class="btn btn-primary">
-                    Save Changes
-                </button>
-
-            {% else %}
-
-                <a
-                    href="{% url 'crm:contact_list' %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button type="submit" class="btn btn-primary">
-                    Add Contact
-                </button>
-
-            {% endif %}
-
+            {% endfor %}
         </div>
-
+        {% if form.non_field_errors %}<div class="auth-error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-actions">
+            <a href="{% if is_edit %}{% url 'crm:contact_detail' contact.id %}{% else %}{% url 'crm:contact_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{% if is_edit %}Save changes{% else %}Create contact{% endif %}</button>
+        </div>
     </form>
-
 </div>
-
+</div>
 {% endblock %}

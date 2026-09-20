@@ -1,68 +1,31 @@
 {% extends "base.html" %}
-
+{% block title %}{% if is_edit %}Edit Company{% else %}Add Company{% endif %} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>{% if is_edit %}Edit Company{% else %}New Company{% endif %}</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-    <div>
-        {% if is_edit %}
-            <h1>Edit Company</h1>
-            <p>Update the information for {{ company.name }}.</p>
-        {% else %}
-            <h1>Add Company</h1>
-            <p>Add a new company to your CRM.</p>
-        {% endif %}
-    </div>
+    <div><p class="page-eyebrow">CRM / COMPANIES</p><h1>{% if is_edit %}Edit company{% else %}Add a company{% endif %}</h1><p>{% if is_edit %}Keep {{ company.name }}'s customer record up to date.{% else %}Create an organisation record for your customer base.{% endif %}</p></div>
 </div>
-
+<div class="form-shell">
 <div class="content-card">
-
-    <form method="post">
+    <div class="form-card-header"><h2>Company information</h2><p>Capture the details your team needs when working this account.</p></div>
+    <form method="post" class="crm-form">
         {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
+        <div class="form-grid-2">
+            {% for field in form %}
+            <div class="form-group{% if field.name == 'website' %} full{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
-
-                {% if field.errors %}
-                    <div class="form-error">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
+                {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+                {% if field.help_text %}<p class="form-help">{{ field.help_text }}</p>{% endif %}
             </div>
-        {% endfor %}
-
-        <div class="form-actions">
-            {% if is_edit %}
-                <a
-                    href="{% url 'crm:company_detail' company.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button type="submit" class="btn btn-primary">
-                    Save Changes
-                </button>
-            {% else %}
-                <a
-                    href="{% url 'crm:company_list' %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button type="submit" class="btn btn-primary">
-                    Add Company
-                </button>
-            {% endif %}
+            {% endfor %}
         </div>
-
+        {% if form.non_field_errors %}<div class="auth-error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-actions">
+            <a href="{% if is_edit %}{% url 'crm:company_detail' company.id %}{% else %}{% url 'crm:company_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{% if is_edit %}Save changes{% else %}Create company{% endif %}</button>
+        </div>
     </form>
-
 </div>
-
+</div>
 {% endblock %}

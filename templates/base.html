@@ -1,135 +1,155 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>
-        {% block title %}ConnectCRM{% endblock %}
-    </title>
-
+    <meta name="theme-color" content="#0f172a">
+    <title>{% block title %}ConnectCRM{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
     {% block extra_css %}{% endblock %}
 </head>
-
 <body>
+{% block auth_content %}
+<div class="app-shell">
+    <div class="mobile-backdrop" data-mobile-backdrop></div>
 
-    {% block auth_content %}
+    <aside class="sidebar" data-sidebar>
+        <div class="sidebar-brand">
+            <a href="{% url 'core:dashboard' %}" class="brand-link">
+                <span class="brand-icon">C</span>
+                <span class="brand-copy">
+                    <strong>ConnectCRM</strong>
+                    <small>Sales workspace</small>
+                </span>
+            </a>
+        </div>
 
-    <div class="app-layout">
+        <nav class="sidebar-nav" aria-label="Main navigation">
+            <p class="nav-label">WORKSPACE</p>
+            <a href="{% url 'core:dashboard' %}" class="nav-link{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
+                <span class="nav-icon">⌂</span><span>Dashboard</span>
+            </a>
 
-        <!-- CONNECTCRM SHARED SIDEBAR -->
-        <aside class="sidebar">
+            <p class="nav-label nav-label-spaced">CRM</p>
+            <a href="{% url 'crm:company_list' %}" class="nav-link{% if 'company' in request.resolver_match.url_name %} active{% endif %}">
+                <span class="nav-icon">▦</span><span>Companies</span>
+            </a>
+            <a href="{% url 'crm:contact_list' %}" class="nav-link{% if 'contact' in request.resolver_match.url_name %} active{% endif %}">
+                <span class="nav-icon">◉</span><span>Contacts</span>
+            </a>
+            <a href="{% url 'crm:deal_list' %}" class="nav-link{% if 'deal' in request.resolver_match.url_name %} active{% endif %}">
+                <span class="nav-icon">◇</span><span>Deals</span>
+            </a>
+            <a href="{% url 'crm:task_list' %}" class="nav-link{% if 'task' in request.resolver_match.url_name %} active{% endif %}">
+                <span class="nav-icon">✓</span><span>Tasks</span>
+            </a>
 
-            <!-- Brand -->
-            <div class="sidebar-brand">
-                <a href="{% url 'core:dashboard' %}" class="brand-link">
-                    <span class="brand-icon">C</span>
-                    <span class="brand-text">ConnectCRM</span>
+            {% if header_membership and header_membership.role == 'admin' %}
+                <a href="{% url 'crm:invitation_create' %}" class="nav-link{% if 'invitation' in request.resolver_match.url_name %} active{% endif %}">
+                    <span class="nav-icon">＋</span><span>Invite Team</span>
                 </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'core:help' %}" class="nav-link{% if request.resolver_match.url_name == 'help' %} active{% endif %}">
+                <span class="nav-icon">?</span><span>Help & Support</span>
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-link nav-button">
+                    <span class="nav-icon">↪</span><span>Log out</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="mobile-menu-button" data-mobile-menu aria-label="Open navigation">☰</button>
+                <div class="topbar-title">{% block page_heading %}<h1>Workspace</h1>{% endblock %}</div>
             </div>
 
-            <!-- Main Navigation -->
-            <nav class="sidebar-nav">
-
-                <p class="nav-label">MAIN MENU</p>
-
-                <a href="{% url 'core:dashboard' %}" class="nav-link">
-                    <span class="nav-icon">⌂</span>
-                    <span>Dashboard</span>
-                </a>
-
-                <p class="nav-label">CRM</p>
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">👤</span>
-                    <span>Contacts</span>
-                </a>
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">🏢</span>
-                    <span>Companies</span>
-                </a>
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">◫</span>
-                    <span>Deals</span>
-                </a>
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">✓</span>
-                    <span>Tasks</span>
-                </a>
-
-            </nav>
-
-            <!-- Bottom Navigation -->
-            <div class="sidebar-footer">
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">⚙</span>
-                    <span>Settings</span>
-                </a>
-
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">?</span>
-                    <span>Help & Support</span>
-                </a>
-
-            </div>
-
-        </aside>
-
-        <!-- MAIN APPLICATION AREA -->
-        <main class="main-content">
-
-            <!-- Shared Top Bar -->
-            <header class="topbar">
-
-                <div class="topbar-left">
-                    {% block page_heading %}{% endblock %}
+            <div class="topbar-right">
+                <div class="global-search" data-search data-suggestions-url="{% url 'crm:search_suggestions' %}">
+                    <form method="get" action="{% url 'crm:search' %}" class="search-form" role="search">
+                        <span class="search-icon" aria-hidden="true">⌕</span>
+                        <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CRM" autocomplete="off" aria-label="Search CRM" data-search-input>
+                        <button type="submit" class="search-submit" aria-label="Search">↵</button>
+                    </form>
+                    <div class="search-suggestions" data-search-suggestions hidden></div>
                 </div>
 
-                <div class="topbar-right">
-
-                    <div class="search-placeholder">
-                        <span>⌕</span>
-                        <span>Search...</span>
+                <div class="header-popover-wrap">
+                    <button type="button" class="header-icon-button{% if header_notification_count %} has-notifications{% endif %}" data-notification-toggle aria-expanded="false" aria-label="Notifications">
+                        <span class="bell-icon">🔔</span>
+                        {% if header_notification_count %}<span class="notification-dot">{{ header_notification_count }}</span>{% endif %}
+                    </button>
+                    <div class="header-popover notifications-popover" data-notification-menu hidden>
+                        <div class="popover-header">
+                            <div><strong>Notifications</strong><span>Stay on top of your workspace</span></div>
+                            <span class="popover-count">{{ header_notification_count }}</span>
+                        </div>
+                        {% if header_notifications %}
+                            <div class="notification-list">
+                                {% for notification in header_notifications %}
+                                    <a href="{{ notification.url }}" class="notification-item notification-{{ notification.kind }}">
+                                        <span class="notification-marker"></span>
+                                        <span><strong>{{ notification.title }}</strong><small>{{ notification.description }}</small></span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="popover-empty"><span class="empty-icon">✓</span><strong>You're all caught up</strong><p>No new CRM alerts right now.</p></div>
+                        {% endif %}
                     </div>
-
-                    <button type="button" class="icon-button">
-                        🔔
-                    </button>
-
-                    <button type="button" class="user-menu">
-                        <span class="user-avatar">CK</span>
-                        <span class="user-name">User</span>
-                        <span>⌄</span>
-                    </button>
-
                 </div>
 
-            </header>
+                <a href="{% url 'core:help' %}" class="header-icon-button" aria-label="Help">?</a>
 
-            <!-- Page Content -->
-            <section class="page-content">
+                <div class="header-popover-wrap user-menu-wrap">
+                    <button type="button" class="user-menu-trigger" data-user-toggle aria-expanded="false">
+                        <span class="user-avatar">{{ request.user.username|slice:":2"|upper }}</span>
+                        <span class="user-menu-text"><strong>{{ request.user.username }}</strong><small>{{ header_membership.get_role_display|default:"Member" }}</small></span>
+                        <span class="chevron">⌄</span>
+                    </button>
+                    <div class="header-popover user-popover" data-user-menu hidden>
+                        <div class="user-popover-head">
+                            <span class="user-avatar large">{{ request.user.username|slice:":2"|upper }}</span>
+                            <div><strong>{{ request.user.username }}</strong><span>{{ request.user.email }}</span></div>
+                        </div>
+                        <div class="popover-links">
+                            <a href="{% url 'accounts:profile' %}"><span>◎</span> My account</a>
+                            <a href="{% url 'core:help' %}"><span>?</span> Help & Support</a>
+                        </div>
+                        <form method="post" action="{% url 'accounts:logout' %}" class="popover-logout">
+                            {% csrf_token %}
+                            <button type="submit"><span>↪</span> Log out</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-                {% block content %}
-                {% endblock %}
-
-            </section>
-
-        </main>
-
-    </div>
-
-    {% endblock auth_content %}
-
-    {% block extra_js %}{% endblock %}
-
+        <section class="page-content">
+            {% if messages %}
+                <div class="message-stack">
+                    {% for message in messages %}
+                        <div class="message message-{{ message.tags }}" data-message>
+                            <span>{{ message }}</span>
+                            <button type="button" aria-label="Dismiss" data-dismiss-message>×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+</div>
+{% endblock auth_content %}
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

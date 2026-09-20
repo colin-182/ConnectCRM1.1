@@ -1,156 +1,47 @@
 {% extends "base.html" %}
-
+{% block title %}Tasks | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Tasks</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-
-    <div>
-        <h1>Tasks</h1>
-        <p>Manage your CRM tasks and follow-up activities.</p>
-    </div>
-
-    <div class="page-actions">
-        <a href="{% url 'crm:task_create' %}" class="btn btn-primary">
-            Add Task
-        </a>
-    </div>
-
+    <div><p class="page-eyebrow">CRM / TASKS</p><h1>Tasks</h1><p>Turn customer conversations into clear next actions.</p></div>
+    <div class="page-actions"><a href="{% url 'crm:task_create' %}" class="btn btn-primary">＋ Add task</a></div>
 </div>
-
+<div class="pipeline-summary">
+    <div class="summary-card"><span>Open tasks</span><strong>{{ open_total }}</strong></div>
+    <div class="summary-card"><span>Completed</span><strong>{{ completed_total }}</strong></div>
+    <div class="summary-card"><span>Showing</span><strong>{{ task_count }}</strong></div>
+    <div class="summary-card"><span>Focus</span><strong>{% if status == 'completed' %}Completed{% else %}Open{% endif %}</strong></div>
+</div>
+<form method="get" class="filter-bar">
+    <div class="filter-search"><span>⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search tasks, companies, contacts or deals..."></div>
+    <select class="filter-select" name="status" aria-label="Filter tasks by status">
+        <option value="open"{% if status == 'open' %} selected{% endif %}>Open tasks</option>
+        <option value="completed"{% if status == 'completed' %} selected{% endif %}>Completed</option>
+        <option value="all"{% if status == 'all' %} selected{% endif %}>All tasks</option>
+    </select>
+    {% if query %}<a href="{% url 'crm:task_list' %}" class="btn btn-secondary">Clear search</a>{% endif %}
+    <span class="filter-count">{{ task_count }} task{{ task_count|pluralize }}</span>
+</form>
 <div class="content-card">
-
-    <div class="card-header">
-        <div>
-            <h2>All Tasks</h2>
-            <p>Tasks currently tracked in your CRM.</p>
-        </div>
-    </div>
-
     {% if tasks %}
-
-        <div class="table-responsive">
-
-            <table class="data-table">
-
-                <thead>
-                    <tr>
-                        <th>Task</th>
-                        <th>Due Date</th>
-                        <th>Due Time</th>
-                        <th>Company</th>
-                        <th>Contact</th>
-                        <th>Deal</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {% for task in tasks %}
-
-                        <tr>
-
-                            <td>
-                                <a
-                                    href="{% url 'crm:task_detail' task.id %}"
-                                    class="table-link"
-                                >
-                                    {{ task.title }}
-                                </a>
-                            </td>
-
-                            <td>
-                                {% if task.due_date %}
-                                    {{ task.due_date|date:"d M Y" }}
-                                {% else %}
-                                    Not set
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if task.due_time %}
-                                    {{ task.due_time|time:"H:i" }}
-                                {% else %}
-                                    Not set
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if task.company %}
-                                    <a
-                                        href="{% url 'crm:company_detail' task.company.id %}"
-                                    >
-                                        {{ task.company.name }}
-                                    </a>
-                                {% else %}
-                                    Not assigned
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if task.contact %}
-                                    <a
-                                        href="{% url 'crm:contact_detail' task.contact.id %}"
-                                    >
-                                        {{ task.contact.first_name }}
-                                        {{ task.contact.last_name }}
-                                    </a>
-                                {% else %}
-                                    Not assigned
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if task.deal %}
-                                    <a
-                                        href="{% url 'crm:deal_detail' task.deal.id %}"
-                                    >
-                                        {{ task.deal.title }}
-                                    </a>
-                                {% else %}
-                                    Not assigned
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if task.completed %}
-                                    Completed
-                                {% else %}
-                                    Open
-                                {% endif %}
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
+        <div class="crm-list-head task-grid"><span>Task</span><span>Due</span><span>Company</span><span>Related</span><span>Status</span><span></span></div>
+        <div class="crm-list">
+        {% for task in tasks %}
+            <div class="crm-row task-grid">
+                <div class="task-main">
+                    <form method="post" action="{% url 'crm:task_toggle' task.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="task-toggle{% if task.completed %} completed{% endif %}" aria-label="Toggle {{ task.title }}">✓</button></form>
+                    <a href="{% url 'crm:task_detail' task.id %}" style="min-width:0;text-decoration:none"><strong class="row-title{% if task.completed %} completed{% endif %}">{{ task.title }}</strong><small class="row-subtitle">{{ task.description|default:"No description"|truncatechars:65 }}</small></a>
+                </div>
+                <span class="due-date {% if task.due_date < today and not task.completed %}due-overdue{% elif task.due_date == today %}due-today{% else %}due-future{% endif %}">{% if task.due_date %}{{ task.due_date|date:"d M Y" }}{% else %}No due date{% endif %}{% if task.due_time %}<small class="row-subtitle">{{ task.due_time|time:"H:i" }}</small>{% endif %}</span>
+                <span class="row-meta">{{ task.company.name|default:"—" }}</span>
+                <span class="row-meta">{% if task.contact %}{{ task.contact.first_name }} {{ task.contact.last_name }}{% elif task.deal %}{{ task.deal.title }}{% else %}—{% endif %}</span>
+                <span><span class="badge {% if task.completed %}badge-green{% else %}badge-blue{% endif %}">{% if task.completed %}Completed{% else %}Open{% endif %}</span></span>
+                <a href="{% url 'crm:task_detail' task.id %}" class="row-action">›</a>
+            </div>
+        {% endfor %}
         </div>
-
     {% else %}
-
-        <div class="empty-state">
-
-            <h3>No tasks yet</h3>
-
-            <p>
-                Create your first task to start tracking follow-up activities.
-            </p>
-
-            <a
-                href="{% url 'crm:task_create' %}"
-                class="btn btn-primary"
-            >
-                Add Your First Task
-            </a>
-
-        </div>
-
+        <div class="empty-state"><div class="avatar-square" style="margin:0 auto 12px">✓</div><h3>{% if query %}No tasks found{% else %}{% if status == "completed" %}No completed tasks{% elif status == "all" %}No tasks{% else %}No open tasks{% endif %}{% endif %}</h3><p>{% if query %}Try another search.{% else %}Create a task to keep your next customer action visible.{% endif %}</p><a href="{% url 'crm:task_create' %}" class="btn btn-primary">Add a task</a></div>
     {% endif %}
-
 </div>
-
 {% endblock %}

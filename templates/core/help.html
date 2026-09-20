@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Help & Support | ConnectCRM{% endblock %}
+
+{% block page_heading %}
+<h1>Help & Support</h1>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <p class="page-eyebrow">SUPPORT</p>
+        <h1>How ConnectCRM works</h1>
+        <p>Quick guidance for managing your CRM workspace.</p>
+    </div>
+</div>
+
+<div class="help-grid">
+
+    <section class="content-card">
+        <h2>Companies</h2>
+        <p>
+            Add and maintain the organisations you sell to. Companies can
+            be linked to contacts, deals and tasks.
+        </p>
+        <a href="{% url 'crm:company_list' %}" class="btn btn-secondary">
+            View companies
+        </a>
+    </section>
+
+    <section class="content-card">
+        <h2>Contacts</h2>
+        <p>
+            Store the people connected to your customers and link them to
+            the relevant company.
+        </p>
+        <a href="{% url 'crm:contact_list' %}" class="btn btn-secondary">
+            View contacts
+        </a>
+    </section>
+
+    <section class="content-card">
+        <h2>Deals</h2>
+        <p>
+            Track opportunities from lead through qualification, proposal,
+            negotiation and closed stages.
+        </p>
+        <a href="{% url 'crm:deal_list' %}" class="btn btn-secondary">
+            View deals
+        </a>
+    </section>
+
+    <section class="content-card">
+        <h2>Tasks</h2>
+        <p>
+            Create follow-up actions and assign due dates and times so your
+            next steps stay visible.
+        </p>
+        <a href="{% url 'crm:task_list' %}" class="btn btn-secondary">
+            View tasks
+        </a>
+    </section>
+
+    <section class="content-card">
+        <h2>Team invitations</h2>
+        <p>
+            Business administrators can invite Sales or Member users by
+            email. Invitations remain valid for seven days.
+        </p>
+        {% if membership and membership.role == 'admin' %}
+            <a
+                href="{% url 'crm:invitation_create' %}"
+                class="btn btn-secondary"
+            >
+                Invite a team member
+            </a>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

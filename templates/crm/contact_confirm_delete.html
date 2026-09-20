@@ -1,58 +1,7 @@
 {% extends "base.html" %}
-
+{% block title %}Delete Contact | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Delete Contact</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-    <div>
-        <h1>Delete Contact</h1>
-        <p>Confirm that you want to remove this contact.</p>
-    </div>
-</div>
-
-<div class="content-card">
-
-    <div class="delete-confirmation">
-
-        <div class="delete-warning">
-            <h2>
-                Delete {{ contact.first_name }} {{ contact.last_name }}?
-            </h2>
-
-            <p>
-                This action will permanently remove this contact
-                from your CRM.
-            </p>
-
-            <p>
-                This cannot be undone.
-            </p>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'crm:contact_detail' contact.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-danger"
-                >
-                    Delete Contact
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
+<div class="page-header"><div><p class="page-eyebrow">CONTACT</p><h1>Delete contact</h1><p>Remove this person from your CRM.</p></div></div>
+<div class="content-card delete-confirmation"><div class="delete-warning"><div class="detail-identity" style="margin-bottom:20px"><div class="detail-avatar contact">{{ contact.first_name|slice:":1"|upper }}{{ contact.last_name|slice:":1"|upper }}</div><div><h2>{{ contact.first_name }} {{ contact.last_name }}</h2><p>{{ contact.job_title|default:"Contact" }}</p></div></div><p>Are you sure you want to delete <strong>{{ contact.first_name }} {{ contact.last_name }}</strong>?</p><p>This cannot be undone.</p></div><form method="post"><div class="form-actions"><a href="{% url 'crm:contact_detail' contact.id %}" class="btn btn-secondary">Cancel</a>{% csrf_token %}<button type="submit" class="btn btn-danger">Delete contact</button></div></form></div>
 {% endblock %}

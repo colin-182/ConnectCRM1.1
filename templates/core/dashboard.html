@@ -14,10 +14,17 @@
     <div>
         <p class="page-eyebrow">OVERVIEW</p>
 
-        <h2>Welcome back!</h2>
+        <h2>Welcome back, {{ request.user.first_name|default:request.user.username }}!</h2>
 
         <p class="dashboard-subtitle">
-            Here is an overview of your business activity.
+            {% if business %}
+                Here is an overview of {{ business.name }}.
+                {% if workspace_url %}
+                    Your workspace: <a href="{{ workspace_url }}">{{ workspace_url }}</a>
+                {% endif %}
+            {% else %}
+                Your account is ready, but no business membership is available.
+            {% endif %}
         </p>
     </div>
 
@@ -35,7 +42,7 @@
 <div class="stats-grid">
 
     <!-- Total Contacts -->
-    <div class="stat-card card">
+    <a href="{% url 'crm:contact_list' %}" class="stat-card card">
 
         <div class="stat-card-top">
 
@@ -57,11 +64,11 @@
             Current contacts in your CRM
         </p>
 
-    </div>
+    </a>
 
 
     <!-- Active Deals -->
-    <div class="stat-card card">
+    <a href="{% url 'crm:deal_list' %}?active=1" class="stat-card card">
 
         <div class="stat-card-top">
 
@@ -83,11 +90,11 @@
             Current open opportunities
         </p>
 
-    </div>
+    </a>
 
 
     <!-- Pipeline Value -->
-    <div class="stat-card card">
+    <a href="{% url 'crm:deal_list' %}?active=1" class="stat-card card">
 
         <div class="stat-card-top">
 
@@ -109,11 +116,11 @@
             Value of active opportunities
         </p>
 
-    </div>
+    </a>
 
 
     <!-- Tasks Due -->
-    <div class="stat-card card">
+    <a href="{% url 'crm:task_list' %}" class="stat-card card">
 
         <div class="stat-card-top">
 
@@ -135,7 +142,7 @@
             Open tasks requiring action
         </p>
 
-    </div>
+    </a>
 
 </div>
 
@@ -213,6 +220,46 @@
     </div>
 
 </section>
+
+
+{% if is_admin and team_pipeline %}
+<!-- Team Pipeline (managers only) -->
+<section class="pipeline-section card">
+
+    <div class="section-header">
+
+        <div>
+
+            <h3>
+                Team Pipeline
+            </h3>
+
+            <p>
+                Active deals broken down by salesperson. Click anyone to see their deals.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="detail-grid">
+
+        {% for member in team_pipeline %}
+
+            <a
+                href="{% url 'crm:deal_list' %}?owner={{ member.user_id|default:'unassigned' }}"
+                class="detail-box"
+            >
+                <span>{{ member.name }}</span>
+                <strong>{{ member.deal_count }} deal{{ member.deal_count|pluralize }} · €{{ member.pipeline_value|floatformat:0 }}</strong>
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+{% endif %}
 
 
 <!-- Dashboard Lower Grid -->
@@ -328,7 +375,11 @@
 
                 <div class="task-item">
 
-                    <div class="task-checkbox"></div>
+                    <form method="post" action="{% url 'crm:task_toggle' task.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="task-toggle" aria-label="Mark {{ task.title }} complete">✓</button>
+                    </form>
 
                     <div class="task-content">
 

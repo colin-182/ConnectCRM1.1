@@ -1,64 +1,10 @@
 {% extends "base.html" %}
-
+{% block title %}Invite Team | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Team</h1>{% endblock %}
 {% block content %}
-
-<div class="page-header">
-    <div>
-        <h1>Invite a team member</h1>
-        <p>
-            Invite someone to join {{ business.name }} on ConnectCRM.
-        </p>
-    </div>
+<div class="page-header"><div><p class="page-eyebrow">TEAM</p><h1>Invite a team member</h1><p>Give a colleague access to {{ business.name }} with a Sales or Member role.</p></div></div>
+<div class="form-shell">
+<div class="content-card"><div class="form-card-header"><h2>New invitation</h2><p>Invitation links expire after seven days and can only be accepted once.</p></div><form method="post" class="crm-form">{% csrf_token %}{% if form.non_field_errors %}<div class="auth-error">{{ form.non_field_errors }}</div>{% endif %}<div class="form-grid-2"><div class="form-group"><label for="{{ form.email.id_for_label }}">Email address</label>{{ form.email }}{% for error in form.email.errors %}<p class="form-error">{{ error }}</p>{% endfor %}</div><div class="form-group"><label for="{{ form.role.id_for_label }}">Role</label>{{ form.role }}{% for error in form.role.errors %}<p class="form-error">{{ error }}</p>{% endfor %}</div></div><div class="form-actions"><a href="{% url 'core:dashboard' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary">Create invitation</button></div></form></div>
 </div>
-
-<div class="form-card">
-    <form method="post">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="form-errors">
-                {{ form.non_field_errors }}
-            </div>
-        {% endif %}
-
-        <div class="form-group">
-            <label for="{{ form.email.id_for_label }}">
-                Email address
-            </label>
-
-            {{ form.email }}
-
-            {% if form.email.errors %}
-                <div class="field-error">
-                    {{ form.email.errors }}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.role.id_for_label }}">
-                Role
-            </label>
-
-            {{ form.role }}
-
-            {% if form.role.errors %}
-                <div class="field-error">
-                    {{ form.role.errors }}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                Create invitation
-            </button>
-
-            <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
-                Cancel
-            </a>
-        </div>
-    </form>
-</div>
-
+<div class="content-card"><div class="section-header"><div><h3>Pending invitations</h3><p>Active invitations that have not been accepted yet.</p></div></div>{% if pending_invitations %}<div class="invitation-list">{% for invitation in pending_invitations %}<div class="invitation-row"><div><strong>{{ invitation.email }}</strong><span>{{ invitation.get_role_display }} · Expires {{ invitation.expires_at|date:"d M Y" }}</span></div><a href="{% url 'crm:invitation_accept' invitation.token %}" class="text-link">Open invitation →</a></div>{% endfor %}</div>{% else %}<div class="empty-state"><h3>No pending invitations</h3><p>New invitations will appear here until they are accepted.</p></div>{% endif %}</div>
 {% endblock %}

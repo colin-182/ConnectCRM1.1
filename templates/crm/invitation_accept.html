@@ -1,66 +1,134 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block title %}ConnectCRM Invitation{% endblock %}
 
-<div class="page-header">
-    <div>
-        <h1>ConnectCRM invitation</h1>
+{% block auth_content %}
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="auth-brand">
+            <span class="auth-brand-icon">C</span>
+            <span class="auth-brand-text">ConnectCRM</span>
+        </div>
+
+        {% if invalid_invitation %}
+
+            <div class="auth-header">
+                <p class="page-eyebrow">INVITATION</p>
+                <h1>Invitation unavailable</h1>
+                <p>
+                    This invitation is invalid, has expired, or has already
+                    been accepted.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'core:home' %}" class="btn btn-primary">
+                    Return to ConnectCRM
+                </a>
+            </div>
+
+        {% else %}
+
+            <div class="auth-header">
+                <p class="page-eyebrow">You're invited</p>
+                <h1>Join {{ invitation.business.name }}</h1>
+                <p>
+                    You've been invited to join this ConnectCRM workspace.
+                </p>
+            </div>
+
+            <div class="invitation-summary">
+                <div class="detail-item">
+                    <span class="detail-label">Business</span>
+                    <span class="detail-value">
+                        {{ invitation.business.name }}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Invited email</span>
+                    <span class="detail-value">
+                        {{ invitation.email }}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Role</span>
+                    <span class="detail-value">
+                        {{ invitation.get_role_display }}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Expires</span>
+                    <span class="detail-value">
+                        {{ invitation.expires_at|date:"j F Y, H:i" }}
+                    </span>
+                </div>
+            </div>
+
+            {% if request.user.is_authenticated %}
+
+                {% if email_matches %}
+
+                    <form method="post" class="form-actions">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">
+                            Join {{ invitation.business.name }}
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    <div class="auth-error">
+                        You are currently signed in as
+                        <strong>{{ request.user.email }}</strong>.
+                        This invitation was sent to
+                        <strong>{{ invitation.email }}</strong>.
+                        Please sign in with the invited account.
+                    </div>
+
+                    <div class="form-actions">
+                        <form
+                            method="post"
+                            action="{% url 'accounts:logout' %}"
+                        >
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">
+                                Log out
+                            </button>
+                        </form>
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="form-actions invitation-actions">
+                    <a
+                        href="{% url 'accounts:register' %}?invitation={{ invitation.token }}"
+                        class="btn btn-primary"
+                    >
+                        Create account & join
+                    </a>
+
+                    <a
+                        href="{% url 'accounts:login' %}?next={% url 'crm:invitation_accept' invitation.token %}"
+                        class="btn btn-secondary"
+                    >
+                        Already have an account? Log in
+                    </a>
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
     </div>
-</div>
-
-<div class="form-card">
-
-    {% if invalid_invitation %}
-
-        <h2>Invitation unavailable</h2>
-
-        <p>
-            This invitation is invalid, has expired, or has already been accepted.
-        </p>
-
-        <div class="form-actions">
-            <a href="{% url 'core:home' %}" class="btn btn-primary">
-                Return to ConnectCRM
-            </a>
-        </div>
-
-    {% else %}
-
-        <h2>You're invited</h2>
-
-        <p>
-            You have been invited to join:
-        </p>
-
-        <p>
-            <strong>{{ invitation.business.name }}</strong>
-        </p>
-
-        <p>
-            Role:
-            <strong>{{ invitation.get_role_display }}</strong>
-        </p>
-
-        <p>
-            Invitation expires on
-            <strong>{{ invitation.expires_at|date:"j F Y" }}</strong>.
-        </p>
-
-        <div class="form-actions">
-            <a
-                href="{% url 'accounts:register' %}?invitation={{ invitation.token }}"
-                class="btn btn-primary"
-            >
-                Accept invitation
-            </a>
-
-            <a href="{% url 'core:home' %}" class="btn btn-secondary">
-                Cancel
-            </a>
-        </div>
-
-    {% endif %}
 
 </div>
 
-{% endblock %}
+{% endblock auth_content %}

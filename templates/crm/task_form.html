@@ -1,87 +1,41 @@
 {% extends "base.html" %}
-
+{% block title %}{% if is_edit %}Edit Task{% else %}Add Task{% endif %} | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>{% if is_edit %}Edit Task{% else %}New Task{% endif %}</h1>{% endblock %}
 {% block content %}
-
 <div class="page-header">
-
-    <div>
-        {% if is_edit %}
-            <h1>Edit Task</h1>
-            <p>Update the information for {{ task.title }}.</p>
-        {% else %}
-            <h1>Add Task</h1>
-            <p>Create a new task for your CRM.</p>
-        {% endif %}
-    </div>
-
+    <div><p class="page-eyebrow">CRM / TASKS</p><h1>{% if is_edit %}Edit task{% else %}Add a task{% endif %}</h1><p>{% if is_edit %}Update the next action for {{ task.title }}.{% else %}Create a clear follow-up action for your team.{% endif %}</p></div>
 </div>
-
+<div class="form-shell">
 <div class="content-card">
-
-    <form method="post">
-
+    <div class="form-card-header"><h2>Task details</h2><p>Give the task an owner context, a due date and a clear next step.</p></div>
+    <form method="post" class="crm-form">
         {% csrf_token %}
-
-        {% for field in form %}
-
-            <div class="form-group">
-
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
+        <div class="form-grid-2">
+            {% for field in form %}
+            {% if field.name != 'description' and field.name != 'completed' %}
+            <div class="form-group{% if field.name == 'title' %} full{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
-
-                {% if field.errors %}
-                    <div class="form-error">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
-
+                {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
             </div>
-
-        {% endfor %}
-
-        <div class="form-actions">
-
-            {% if is_edit %}
-
-                <a
-                    href="{% url 'crm:task_detail' task.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    Save Changes
-                </button>
-
-            {% else %}
-
-                <a
-                    href="{% url 'crm:task_list' %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    Add Task
-                </button>
-
             {% endif %}
-
+            {% endfor %}
+            <div class="form-group full">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% for error in form.description.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="form-group full">
+                <label class="checkbox-row">{{ form.completed }} <span>Mark this task as completed</span></label>
+                {% for error in form.completed.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+            </div>
         </div>
-
+        {% if form.non_field_errors %}<div class="auth-error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-actions">
+            <a href="{% if is_edit %}{% url 'crm:task_detail' task.id %}{% else %}{% url 'crm:task_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">{% if is_edit %}Save changes{% else %}Create task{% endif %}</button>
+        </div>
     </form>
-
 </div>
-
+</div>
 {% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Workspace Not Found | ConnectCRM{% endblock %}
+
+{% block auth_content %}
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="auth-brand">
+            <span class="auth-brand-icon">C</span>
+            <span class="auth-brand-text">ConnectCRM</span>
+        </div>
+
+        <div class="auth-header">
+            <p class="page-eyebrow">WORKSPACE NOT FOUND</p>
+
+            <h1>We couldn't find that workspace</h1>
+
+            <p>
+                There's no business registered at
+                <strong>{{ attempted_slug }}.{{ base_domain }}</strong>.
+                Double-check the URL your admin shared with you, or ask
+                them for a new invitation link.
+            </p>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'core:home' %}" class="btn btn-primary">
+                Return to ConnectCRM
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock auth_content %}

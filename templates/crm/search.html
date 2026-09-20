@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Search | ConnectCRM{% endblock %}
+{% block page_heading %}<h1>Search</h1>{% endblock %}
+{% block content %}
+<div class="page-header"><div><p class="page-eyebrow">CRM SEARCH</p><h1>Search your CRM</h1><p>Find companies, contacts, deals and tasks across your workspace.</p></div></div>
+<form method="get" class="filter-bar"><div class="filter-search"><span>⌕</span><input type="search" name="q" value="{{ query }}" placeholder="Search your CRM..."></div><button type="submit" class="btn btn-primary">Search</button></form>
+<div class="content-card">
+{% if query %}
+    <div class="card-header"><div><h2>Results for “{{ query }}”</h2><p>Matching records are limited to your current business.</p></div></div>
+    {% if companies %}<div class="search-results-group"><h3>Companies</h3>{% for company in companies %}<a href="{% url 'crm:company_detail' company.id %}" class="search-result"><span class="avatar-square">{{ company.name|slice:":1"|upper }}</span><span><strong>{{ company.name }}</strong><small>{{ company.industry|default:"Company" }}</small></span></a>{% endfor %}</div>{% endif %}
+    {% if contacts %}<div class="search-results-group"><h3>Contacts</h3>{% for contact in contacts %}<a href="{% url 'crm:contact_detail' contact.id %}" class="search-result"><span class="avatar-round">{{ contact.first_name|slice:":1"|upper }}{{ contact.last_name|slice:":1"|upper }}</span><span><strong>{{ contact.first_name }} {{ contact.last_name }}</strong><small>{{ contact.company.name|default:contact.job_title|default:"Contact" }}</small></span></a>{% endfor %}</div>{% endif %}
+    {% if deals %}<div class="search-results-group"><h3>Deals</h3>{% for deal in deals %}<a href="{% url 'crm:deal_detail' deal.id %}" class="search-result"><span class="avatar-square">◇</span><span><strong>{{ deal.title }}</strong><small>€{{ deal.value|floatformat:2 }} · {{ deal.get_stage_display }}</small></span></a>{% endfor %}</div>{% endif %}
+    {% if tasks %}<div class="search-results-group"><h3>Tasks</h3>{% for task in tasks %}<a href="{% url 'crm:task_detail' task.id %}" class="search-result"><span class="avatar-square">✓</span><span><strong>{{ task.title }}</strong><small>{% if task.completed %}Completed{% else %}Open{% endif %}{% if task.due_date %} · {{ task.due_date|date:"d M Y" }}{% endif %}</small></span></a>{% endfor %}</div>{% endif %}
+    {% if not companies and not contacts and not deals and not tasks %}<div class="empty-state"><h3>No results found</h3><p>Try a company name, contact, deal or task.</p></div>{% endif %}
+{% else %}
+    <div class="empty-state"><span class="empty-icon">⌕</span><h3>Search your workspace</h3><p>Use the search box above to find records across your CRM.</p></div>
+{% endif %}
+</div>
+{% endblock %}
