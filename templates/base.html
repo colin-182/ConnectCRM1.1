@@ -8,6 +8,8 @@
     <title>{% block title %}ConnectCRM{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
 {% block auth_content %}
