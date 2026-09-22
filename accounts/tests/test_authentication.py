@@ -2,6 +2,9 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.core import mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -281,3 +284,97 @@ class InvitationEmailTests(TestCase):
         self.assertIn("Acme Ltd", mail.outbox[0].subject)
         self.assertIn("/crm/invitations/", mail.outbox[0].body)
         self.assertIn("newmember@example.com", mail.outbox[0].to)
+
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class PasswordResetTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="resetuser",
+            password="OldStrongPass123!",
+            email="resetuser@example.com",
+        )
+
+    def test_password_reset_request_sends_email(self):
+        response = self.client.post(
+            reverse("accounts:password_reset"),
+            {"email": "resetuser@example.com"},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("accounts:password_reset_done"),
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].subject,
+            "Reset your ConnectCRM password",
+        )
+        self.assertIn("resetuser@example.com", mail.outbox[0].to)
+        self.assertIn("/accounts/reset/", mail.outbox[0].body)
+        self.assertIn("create a new password", mail.outbox[0].body)
+
+    def test_password_reset_request_does_not_reveal_unknown_email(self):
+        response = self.client.post(
+            reverse("accounts:password_reset"),
+            {"email": "does-not-exist@example.com"},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("accounts:password_reset_done"),
+        )
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_password_reset_link_allows_password_change(self):
+        self.client.post(
+            reverse("accounts:password_reset"),
+            {"email": "resetuser@example.com"},
+        )
+
+        email_body = mail.outbox[0].body
+        uidb64 = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+
+        reset_path = reverse(
+            "accounts:password_reset_confirm",
+            kwargs={"uidb64": uidb64, "token": token},
+        )
+
+        self.assertIn(reset_path, email_body)
+
+        response = self.client.get(reset_path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create a new password")
+
+        response = self.client.post(
+            reset_path,
+            {
+                "new_password1": "NewStrongPass123!",
+                "new_password2": "NewStrongPass123!",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("accounts:password_reset_complete"),
+        )
+
+        self.user.refresh_from_db()
+        self.assertTrue(
+            self.user.check_password("NewStrongPass123!")
+        )
+
+    def test_password_reset_confirm_page_rejects_invalid_link(self):
+        response = self.client.get(
+            reverse(
+                "accounts:password_reset_confirm",
+                kwargs={
+                    "uidb64": "MQ",
+                    "token": "invalid-token",
+                },
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid reset link")
