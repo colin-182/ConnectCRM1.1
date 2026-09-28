@@ -7,8 +7,14 @@ app_name = "crm"
 
 
 urlpatterns = [
+    # Companies
     path("companies/", views.company_list, name="company_list"),
     path("companies/add/", views.company_create, name="company_create"),
+    path(
+        "companies/google-search/",
+        views.company_google_search,
+        name="company_google_search",
+    ),
     path(
         "companies/<int:company_id>/",
         views.company_detail,
@@ -25,6 +31,7 @@ urlpatterns = [
         name="company_delete",
     ),
 
+    # Contacts
     path("contacts/", views.contact_list, name="contact_list"),
     path("contacts/add/", views.contact_create, name="contact_create"),
     path(
@@ -43,6 +50,7 @@ urlpatterns = [
         name="contact_delete",
     ),
 
+    # Deals
     path("deals/", views.deal_list, name="deal_list"),
     path("deals/add/", views.deal_create, name="deal_create"),
     path(
@@ -61,6 +69,7 @@ urlpatterns = [
         name="deal_delete",
     ),
 
+    # Tasks
     path("tasks/", views.task_list, name="task_list"),
     path("tasks/add/", views.task_create, name="task_create"),
     path(
@@ -84,6 +93,7 @@ urlpatterns = [
         name="task_delete",
     ),
 
+    # Search
     path("search/", views.search, name="search"),
     path(
         "search/suggestions/",
@@ -91,6 +101,7 @@ urlpatterns = [
         name="search_suggestions",
     ),
 
+    # Invitations
     path(
         "invitations/add/",
         views.invitation_create,
