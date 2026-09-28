@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,94 +31,164 @@ SECRET_KEY = os.environ.get(
     'django-insecure-@9^nwt3-w!4thhg$9n&a2601$1y+x+mj6^xkwam(%2n5&alm9%',
 )
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
+
 # The root domain each business workspace is hosted under, e.g. a business
-# with slug "acme" is reachable at acme.<BASE_DOMAIN>. This is a placeholder
-# for local development; set the CONNECTCRM_BASE_DOMAIN environment variable
-# to your real domain (e.g. connectcrm.com) when you deploy. See
-# SUBDOMAINS.md for local testing and deployment instructions.
-BASE_DOMAIN = os.environ.get("CONNECTCRM_BASE_DOMAIN", "connectcrm.local")
+# with slug "acme" is reachable at acme.<BASE_DOMAIN>.
+# This is a placeholder for local development; set the
+# CONNECTCRM_BASE_DOMAIN environment variable to your real domain when
+# you deploy.
+BASE_DOMAIN = os.environ.get(
+    "CONNECTCRM_BASE_DOMAIN",
+    "connectcrm.local",
+)
+
 
 # Subdomains that can never be claimed as a business workspace, because
-# they're used for the marketing site, admin, or infrastructure.
+# they're used by the marketing site, admin, or infrastructure.
 RESERVED_SUBDOMAINS = {
-    "www", "app", "api", "admin", "static", "media", "mail", "ftp",
-    "blog", "help", "support", "status", "dev", "test", "staging",
+    "www",
+    "app",
+    "api",
+    "admin",
+    "static",
+    "media",
+    "mail",
+    "ftp",
+    "blog",
+    "help",
+    "support",
+    "status",
+    "dev",
+    "test",
+    "staging",
 }
+
 
 ALLOWED_HOSTS = [
     BASE_DOMAIN,
-    f".{BASE_DOMAIN}",  # matches any subdomain, e.g. acme.connectcrm.local
+    f".{BASE_DOMAIN}",
     "localhost",
     "127.0.0.1",
 ]
 
-# Extra hosts (comma separated) can be supplied for real deployments,
-# e.g. CONNECTCRM_EXTRA_HOSTS="connectcrm.com,.connectcrm.com"
-_extra_hosts = os.environ.get("CONNECTCRM_EXTRA_HOSTS", "")
-if _extra_hosts:
-    ALLOWED_HOSTS.extend(host.strip() for host in _extra_hosts.split(",") if host.strip())
 
-# CSRF needs to trust the root domain and every business subdomain, since
-# each workspace posts forms back to its own https://<slug>.<domain> host.
-# The wildcard "*.example.com" form is supported by Django for this.
+# Extra hosts can be supplied for real deployments.
+# Example:
+# CONNECTCRM_EXTRA_HOSTS="connectcrm.com,.connectcrm.com"
+_extra_hosts = os.environ.get("CONNECTCRM_EXTRA_HOSTS", "")
+
+if _extra_hosts:
+    ALLOWED_HOSTS.extend(
+        host.strip()
+        for host in _extra_hosts.split(",")
+        if host.strip()
+    )
+
+
+# CSRF needs to trust the root domain and every business subdomain.
 CSRF_TRUSTED_ORIGINS = [
     f"https://{BASE_DOMAIN}",
     f"https://*.{BASE_DOMAIN}",
 ]
-_extra_csrf_origins = os.environ.get("CONNECTCRM_EXTRA_CSRF_ORIGINS", "")
+
+
+_extra_csrf_origins = os.environ.get(
+    "CONNECTCRM_EXTRA_CSRF_ORIGINS",
+    "",
+)
+
 if _extra_csrf_origins:
-    CSRF_TRUSTED_ORIGINS.extend(origin.strip() for origin in _extra_csrf_origins.split(",") if origin.strip())
+    CSRF_TRUSTED_ORIGINS.extend(
+        origin.strip()
+        for origin in _extra_csrf_origins.split(",")
+        if origin.strip()
+    )
 
 
+# ---------------------------------------------------------------------------
+# Google Places API
+# ---------------------------------------------------------------------------
+#
+# The API key is stored in the local .env file during development and as a
+# Render environment variable in production.
+#
+# Local .env:
+#
+# GOOGLE_PLACES_API_KEY=your_key_here
+#
+# Render:
+#
+# GOOGLE_PLACES_API_KEY=your_key_here
+#
+# Never commit the actual API key to GitHub.
+#
+
+GOOGLE_PLACES_API_KEY = os.environ.get(
+    "GOOGLE_PLACES_API_KEY",
+    "",
+)
+
+
+# ---------------------------------------------------------------------------
 # Application definition
+# ---------------------------------------------------------------------------
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'core',
-    'accounts',
-    'crm',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "core",
+    "accounts",
+    "crm",
 ]
+
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'crm.middleware.TenantMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "crm.middleware.TenantMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+
+ROOT_URLCONF = "config.urls"
+
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'core.context_processors.crm_header',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "core.context_processors.crm_header",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
 
+WSGI_APPLICATION = "config.wsgi.application"
+
+
+# ---------------------------------------------------------------------------
+# Database
+# ---------------------------------------------------------------------------
 
 _database_url = os.environ.get("DATABASE_URL")
 
@@ -125,65 +196,84 @@ if _database_url:
     import dj_database_url
 
     DATABASES = {
-        "default": dj_database_url.parse(_database_url, conn_max_age=600, ssl_require=True)
+        "default": dj_database_url.parse(
+            _database_url,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
 
+# ---------------------------------------------------------------------------
 # Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
+# ---------------------------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
     },
 ]
 
 
+# ---------------------------------------------------------------------------
 # Internationalization
-# https://docs.djangoproject.com/en/6.1/topics/i18n/
+# ---------------------------------------------------------------------------
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
+# ---------------------------------------------------------------------------
+# Static files
+# ---------------------------------------------------------------------------
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / "static",
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        
         "BACKEND": (
             "whitenoise.storage.CompressedManifestStaticFilesStorage"
             if not DEBUG
@@ -192,53 +282,68 @@ STORAGES = {
     },
 }
 
+
+# ---------------------------------------------------------------------------
 # Email / password reset
+# ---------------------------------------------------------------------------
 #
 # The safe default is Django's console backend. This keeps local development
-# and tests from attempting real SMTP delivery. For production, explicitly set
-# EMAIL_BACKEND to Django's SMTP backend and provide the SMTP environment
-# variables in the deployment platform.
+# and tests from attempting real SMTP delivery.
+#
+# For production, explicitly set EMAIL_BACKEND and the SMTP settings in
+# Render environment variables.
+#
+
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND",
     "django.core.mail.backends.console.EmailBackend",
 )
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in {
+EMAIL_HOST = os.environ.get(
+    "EMAIL_HOST",
+    "",
+)
+
+EMAIL_PORT = int(
+    os.environ.get(
+        "EMAIL_PORT",
+        "587",
+    )
+)
+
+EMAIL_HOST_USER = os.environ.get(
+    "EMAIL_HOST_USER",
+    "",
+)
+
+EMAIL_HOST_PASSWORD = os.environ.get(
+    "EMAIL_HOST_PASSWORD",
+    "",
+)
+
+EMAIL_USE_TLS = os.environ.get(
+    "EMAIL_USE_TLS",
+    "True",
+).lower() in {
     "1",
     "true",
     "yes",
     "on",
 }
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in {
+
+EMAIL_USE_SSL = os.environ.get(
+    "EMAIL_USE_SSL",
+    "False",
+).lower() in {
     "1",
     "true",
     "yes",
     "on",
 }
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL",
-    "no-reply@connectcrm.local",
-)
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-
-# Password reset links are deliberately short-lived.
-PASSWORD_RESET_TIMEOUT = int(
-    os.environ.get("PASSWORD_RESET_TIMEOUT", "3600")
-)
-
-LOGIN_URL = "accounts:login"
 
 
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = os.environ.get("CONNECTCRM_SSL_REDIRECT", "True") == "True"
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week; raise once you're confident HTTPS is solid everywhere
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = False
+# ---------------------------------------------------------------------------
+# Default primary key field type
+# ---------------------------------------------------------------------------
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -16,6 +16,38 @@ class CompanyForm(forms.ModelForm):
             "website",
         ]
 
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "placeholder": "Company name",
+                    "autocomplete": "organization",
+                }
+            ),
+            "industry": forms.TextInput(
+                attrs={
+                    "placeholder": "Industry",
+                }
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "placeholder": "Phone number",
+                    "autocomplete": "tel",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "placeholder": "Email address",
+                    "autocomplete": "email",
+                }
+            ),
+            "website": forms.URLInput(
+                attrs={
+                    "placeholder": "https://example.com",
+                    "autocomplete": "url",
+                }
+            ),
+        }
+
 
 class ContactForm(forms.ModelForm):
     """Form used to create and edit contacts."""
@@ -36,10 +68,7 @@ class DealForm(forms.ModelForm):
     """Form used to create and edit deals.
 
     The ``owner`` field (who on the team this deal belongs to) is only
-    included when the view passes ``allow_owner_assignment=True`` -
-    sales/member users create and edit only their own deals, so there's
-    nothing for them to assign. Admins get the field so they can hand a
-    deal to the right person.
+    included when the view passes ``allow_owner_assignment=True``.
     """
 
     class Meta:
@@ -56,6 +85,7 @@ class DealForm(forms.ModelForm):
     def __init__(self, *args, allow_owner_assignment=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["owner"].required = False
+
         if not allow_owner_assignment:
             del self.fields["owner"]
 
