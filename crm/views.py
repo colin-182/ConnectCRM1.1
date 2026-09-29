@@ -17,6 +17,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import CompanyForm, ContactForm, DealForm, InvitationForm, TaskForm
 from .models import Company, Contact, Deal, Invitation, Membership, Task
 from .tenancy import get_business_and_membership, scope_deals_for_membership
+from .services.google_places import search_businesses
 
 
 def _scope_deals_for_membership(queryset, membership):
